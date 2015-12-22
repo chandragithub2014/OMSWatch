@@ -24,10 +24,13 @@ public class MainActivity extends Activity implements OMSReceiveListener{
     private Context context = null;
     private NavigationHelper navigationHelper = null;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context = MainActivity.this;
         OMSDBManager manager = new OMSDBManager(MainActivity.this,
                 MainActivity.this);
         manager.load();
@@ -36,6 +39,7 @@ public class MainActivity extends Activity implements OMSReceiveListener{
 
     @Override
     public void receiveResult(String result) {
+        Log.d(TAG,"receiveResult MainActivity");
         if (result.contains(OMSMessages.TRANS_DATABASE_SUCCESS.getValue())) {
 				/*if(OMSConstants.USE_FOOTER_LOAD_TEXT){
 				loadingText.setText(R.string.app_load_policyDB);
@@ -44,11 +48,14 @@ public class MainActivity extends Activity implements OMSReceiveListener{
 				//pd.setTitle(R.string.app_logo_bottom);
 				if(pd!=null) pd.setTitle(Html.fromHtml("<b><H1>"+this.getResources().getString(R.string.app_logo_bottom)+"</H1></b>"));
 				}*/
+            Log.d(TAG,"OMSDBManager.checkNetworkConnectivity()"+OMSDBManager.checkNetworkConnectivity());
             if (OMSDBManager.checkNetworkConnectivity()) {
                 loadIntialScreen();
                 // AppMonitor START
                 Log.d(TAG, "******************startPerformanceMonitoring");
 
+            }else{
+                loadIntialScreen();
             }
         }
     }
@@ -64,7 +71,7 @@ public class MainActivity extends Activity implements OMSReceiveListener{
                     OMSApplication.getInstance().setProgressDialogVisible(false);
                 }
             }*/
-
+            navigationHelper = new NavigationHelper();
 
             int launchScreenOrder = OMSConstants.LAUNCH_SCREEN_ORDER_CONSTANT;
             if(	OMSApplication.getInstance().getLogOutScreenOrder() != -1){

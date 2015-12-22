@@ -34,7 +34,7 @@ public class OMSConstants {
 	public static final String CONFIG_DB_NAME = "10.db";
 	public static final String trans_xml_url = "http://www.twitter.com/statuses/public_timeline.json";
 	public static final String SCHEMA_NAME = "oms";
-	public static final String APP_ID = "444444";
+	public static final String APP_ID = "44444";
 	public static final int CONFIG_APP_ID = 10;	
 	//	Production server url  "http://gtomobilecoe.cognizant.com
 	//  TestServer URL 	 "http://shoponmobile.cognizant.com"
@@ -474,7 +474,8 @@ public class OMSConstants {
 	public static String TRACE_TYPE_SCREEN_LAUNCH = "ScreenLaunch";
 			
 	
-	
+	public static String LIST_HETEROGENEOUS_TYPE = "heterogeneous";
+	public static String LIST_HOMOGENEOUS_TYPE = "homogeneous";
 	
 
 }

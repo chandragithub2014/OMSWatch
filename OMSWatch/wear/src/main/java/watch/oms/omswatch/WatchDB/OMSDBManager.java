@@ -254,6 +254,7 @@ public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener
             if (result.contains(OMSMessages.TRANS_DATABASE_SUCCESS.getValue())) {
                 Log.i(TAG, "TransDataBase  schema - data population finished");
                 if (inReceiveListener != null) {
+					Log.i(TAG, "inReceiveListener!=null");
                     inReceiveListener.receiveResult(result);
                 }
             }
@@ -365,6 +366,7 @@ public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener
 
 	// Verify Network Availability.
 	public static boolean checkNetworkConnectivity() {
+		Log.d("TAG","checkNetworkConnectivity() OMSDBMANAGER");
 		connectionManager = (ConnectivityManager) localContext
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo netInfo = connectionManager.getActiveNetworkInfo();

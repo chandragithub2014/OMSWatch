@@ -58,7 +58,7 @@ public class OMSLoadScreenHelper {
 	 * 
 	 * @param screenType
 	 * @param navId
-	 * @param usid
+	 * @param navUsid
 	 * @param screenOrder
 	 * @param isFullScreen
 	 * @param isMain
@@ -66,18 +66,18 @@ public class OMSLoadScreenHelper {
 	 * @param filterColumnVal
 	 * @param headerTitle
 	 */
-	public void loadTargetScreen(String screenType, int navId, String usid,
+	public void loadTargetScreen(String screenType, int navId, String navUsid,
 			int screenOrder, boolean isFullScreen, boolean isMain,
 			String filterColumnName, String filterColumnVal,
 			String headerTitle, int customScreenContainerId, int appId) {
-		OMSApplication.getInstance().setNavUsid(usid);
+		OMSApplication.getInstance().setNavUsid(navUsid);
 		OMSApplication.getInstance().setScrollerTemplate(false);
 		Log.d(TAG, "method loadTargetScreen, ScreenType:" + screenType
 				+ " navId:" + navId + " screenOrder:" + screenOrder
 				+ " isFullScreen: " + isFullScreen + " isMain: " + isMain
 				+ " appId: " + appId + "headerTitle :: " + headerTitle);
 
-		boolean enableLogout = navHelper.isParentLogin(appId, usid);
+		boolean enableLogout = navHelper.isParentLogin(appId, navUsid);
 		Bundle bundle = null;
 		FragmentManager fm = context.getFragmentManager();
 		//OMSApplication.getInstance().setInViewPager(false);
@@ -92,15 +92,16 @@ public class OMSLoadScreenHelper {
 
 		// Load List Screen Template
 		if (screenType.equalsIgnoreCase(OMSConstants.LIST_SCREEN_TYPE)) {
-            NavigationHelper navigationHelper = new NavigationHelper();
+           /*    NavigationHelper navigationHelper = new NavigationHelper();
 
             // Get SplitView Value from DB
-            boolean showSplitView = navigationHelper.isSplitViewEnable(usid,
+         boolean showSplitView = navigationHelper.isSplitViewEnable(usid,
                     appId);
-            Log.d(TAG, "SplitView from DB - Fragment Tabs" + showSplitView);
+            Log.d(TAG, "SplitView from DB - Fragment Tabs" + showSplitView);*/
+			Log.d(TAG,"mcontainerId:::"+mContainerId);
             bundle = new Bundle();
             bundle.putInt(OMSMessages.SCREEN_ORDER.getValue(), screenOrder);
-            bundle.putString(OMSMessages.UNIQUE_ID.getValue(), usid);
+            bundle.putString(OMSMessages.UNIQUE_ID.getValue(), navUsid);
             bundle.putString(OMSMessages.TITLE.getValue(), headerTitle);
             bundle.putInt(OMSMessages.CUSTOM_CONTAINERID.getValue(),
                     customScreenContainerId);
@@ -109,7 +110,7 @@ public class OMSLoadScreenHelper {
 /*			bundle.putBoolean(OMSMessages.SCREEN_MODE.getValue(),
 					((OMSApplication.getInstance().isSplitView())));*/
             Fragment listFragment = OMSFactory.getInstance(OMSFactory.TemplateType.List,
-                    usid);
+					navUsid);
             listFragment.setArguments(bundle);
 
             //
@@ -225,12 +226,12 @@ public class OMSLoadScreenHelper {
 		}*/ else if (screenType.equalsIgnoreCase(OMSConstants.BAR_CHART_TYPE)) {
 			bundle = new Bundle();
 			bundle.putInt(OMSMessages.CONFIGAPP_ID.getValue(), appId);
-			bundle.putString(OMSMessages.SCREENID.getValue(), usid);
+			bundle.putString(OMSMessages.SCREENID.getValue(), navUsid);
 			bundle.putInt(OMSMessages.CONTAINER_ID.getValue(),
                     customScreenContainerId);
 			bundle.putBoolean(OMSMessages.SCREEN_MODE.getValue(), isFullScreen);
 			Fragment barChart = OMSFactory.getInstance(OMSFactory.TemplateType.BarChart,
-                    usid);
+					navUsid);
 			barChart.setArguments(bundle);
 			fm.beginTransaction().replace(mContainerId, barChart)
 			.addToBackStack(null).commit();
@@ -238,12 +239,12 @@ public class OMSLoadScreenHelper {
 
 			bundle = new Bundle();
 			bundle.putInt(OMSMessages.CONFIGAPP_ID.getValue(), appId);
-			bundle.putString(OMSMessages.SCREENID.getValue(), usid);
+			bundle.putString(OMSMessages.SCREENID.getValue(), navUsid);
 			bundle.putInt(OMSMessages.CONTAINER_ID.getValue(),
                     customScreenContainerId);
 			bundle.putBoolean(OMSMessages.SCREEN_MODE.getValue(), isFullScreen);
 			Fragment lineChart = OMSFactory.getInstance(OMSFactory.TemplateType.LineChart,
-					usid);
+					navUsid);
 			lineChart.setArguments(bundle);
 			fm.beginTransaction().replace(mContainerId, lineChart)
 			.addToBackStack(null).commit();
@@ -252,12 +253,12 @@ public class OMSLoadScreenHelper {
 
 			bundle = new Bundle();
 			bundle.putInt(OMSMessages.CONFIGAPP_ID.getValue(), appId);
-			bundle.putString(OMSMessages.SCREENID.getValue(), usid);
+			bundle.putString(OMSMessages.SCREENID.getValue(), navUsid);
 			bundle.putInt(OMSMessages.CONTAINER_ID.getValue(),
 					customScreenContainerId);
 			bundle.putBoolean(OMSMessages.SCREEN_MODE.getValue(), isFullScreen);
 			Fragment pieChart = OMSFactory.getInstance(OMSFactory.TemplateType.PieChart,
-					usid);
+					navUsid);
 			pieChart.setArguments(bundle);
 			fm.beginTransaction().replace(mContainerId, pieChart)
 			.addToBackStack(null).commit();
@@ -742,7 +743,7 @@ public class OMSLoadScreenHelper {
 				.equalsIgnoreCase(OMSConstants.SPRINGBOARD_SCREEN_TYPE)) {
 			bundle = new Bundle();
 			bundle.putInt(OMSMessages.SCREEN_ORDER.getValue(), screenOrder);
-			bundle.putString(OMSMessages.UNIQUE_ID.getValue(), usid);
+			bundle.putString(OMSMessages.UNIQUE_ID.getValue(), navUsid);
 			bundle.putString(OMSMessages.TITLE.getValue(), headerTitle);
 			bundle.putInt(OMSMessages.CUSTOM_CONTAINERID.getValue(),
                     mContainerId);
@@ -751,7 +752,7 @@ public class OMSLoadScreenHelper {
 			bundle.putBoolean(OMSMessages.SHOW_LOGOUT.getValue(), enableLogout);
 
 			Fragment springBoradFragment = OMSFactory.getInstance(
-					OMSFactory.TemplateType.Springboard, usid);
+					OMSFactory.TemplateType.Springboard, navUsid);
 			springBoradFragment.setArguments(bundle);
 			if (isMain) {
 				fm.beginTransaction()
@@ -767,7 +768,7 @@ public class OMSLoadScreenHelper {
 		} else if (screenType.equalsIgnoreCase(OMSConstants.SPLASH_SCREEN)) {
 			bundle = new Bundle();
 			bundle.putInt(OMSMessages.SCREEN_ORDER.getValue(), screenOrder);
-			bundle.putString(OMSMessages.UNIQUE_ID.getValue(), usid);
+			bundle.putString(OMSMessages.UNIQUE_ID.getValue(), navUsid);
 			bundle.putString(OMSMessages.TITLE.getValue(), headerTitle);
 			bundle.putInt(OMSMessages.CONFIGAPP_ID.getValue(), appId);
 			bundle.putInt(OMSMessages.CUSTOM_CONTAINERID.getValue(),
@@ -775,7 +776,7 @@ public class OMSLoadScreenHelper {
 			bundle.putBoolean(OMSMessages.SCREEN_MODE.getValue(), isFullScreen);
 			bundle.putBoolean(OMSMessages.SHOW_LOGOUT.getValue(), enableLogout);
 			Fragment splashScreenFragment = OMSFactory.getInstance(
-					OMSFactory.TemplateType.SplashScreen, usid);
+					OMSFactory.TemplateType.SplashScreen, navUsid);
 			splashScreenFragment.setArguments(bundle);
 
 			if (isMain) {

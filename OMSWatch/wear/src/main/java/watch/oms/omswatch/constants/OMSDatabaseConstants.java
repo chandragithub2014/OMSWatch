@@ -159,14 +159,14 @@ public class OMSDatabaseConstants {
 	public static final String FORM_SCREEN_ITEMS_SINGLE_COLUMN_UNIQUE_ID = "usid";
 
 	// ListScreen related constants
-	public static final String LIST_SCREEN_TABLE_NAME = "ListScreen";
+	public static final String LIST_SCREEN_TABLE_NAME = "watchlistscreen";
 	
 	public static final String GRID_VIEW_SCREEN_TABLE_NAME = "GridViewScreen";
 	public static final String GRID_VIEW_ITEM_IMG_URL = "gridimageurl";
 	public static final String GRID_VIEW_ITEM_TEXT = "gridtext";
 	
 	
-	public static final String  LIST_SCREEN_ITEMS_TABLE = "ListScreenItems";
+	public static final String  LIST_SCREEN_ITEMS_TABLE = "watchlistscreenitems";
 	public static final String  LIST_SCREEN_ITEM_IMAGE_VIEW = "Image";
 	public static final String  LIST_SCREEN_ITEM_RATING_CONTROL = "Rating Control";
 	public static final String  LIST_SCREEN_ITEM_DYNAMIC_LABEL = "Dynamic Text";
@@ -240,6 +240,8 @@ public class OMSDatabaseConstants {
 	public static final String LIST_SCREEN_SHOW_ACTION_SHEET = "showactionsheet";
 	public static final String LIST_SCREEN_SHOW_ADV_SEARCH = "advancedsearch";
 	public static final String LIST_SCREEN_ADV_SEARCH_GRUOP_BY = "groupcondition";
+	public static final String LIST_TYPE = "listtype";
+
 
 	
 	public static final String LIST_SCREEN_NAVIGATION_UNIQUE_ID = "navusid";

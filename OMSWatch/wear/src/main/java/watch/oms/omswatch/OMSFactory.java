@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import watch.oms.omswatch.constants.OMSConstants;
+import watch.oms.omswatch.fragments.ListScreenFragment;
 
 
 public class OMSFactory {
@@ -41,9 +42,9 @@ public class OMSFactory {
 			//OMS_CORE_CASE_START
 
 			case List:
-			/*	if(!OMSConstants.IS_AUTO_DEBUG_ENABLED)
-					frag = com.cognizant.oms.uitemplate.list.ListScreenFragment.newInstance();
-				else
+				if(!OMSConstants.IS_AUTO_DEBUG_ENABLED)
+					frag = ListScreenFragment.newInstance();
+				/*else
 					frag = com.cognizant.oms.automatedtest.TestListScreen.newInstance();*/
 				break;
 
