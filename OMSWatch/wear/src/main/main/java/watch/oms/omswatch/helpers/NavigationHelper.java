@@ -17,7 +17,6 @@ package watch.oms.omswatch.helpers;
 import java.util.ArrayList;
 
 import android.database.Cursor;
-import android.text.TextUtils;
 import android.util.Log;
 
 import watch.oms.omswatch.OMSDTO.NavigationItems;
@@ -38,87 +37,7 @@ public class NavigationHelper {
 
 	private final String TAG = this.getClass().getSimpleName();
 	//private final String NAVIGATION_DRAWER = "Navigation Drawer";
-
-
-
-	public int  getScreenOrderForNavUsid(String navuisd,int appId){
-		Cursor navigationScreenCursor = null;
-		int parentScreenOrder = -1;
-		try{
-			navigationScreenCursor = OMSDBManager.getConfigDB().query(
-					OMSDatabaseConstants.NAVIGATION_SCREEN_TABLE_NAME,
-					null,OMSDatabaseConstants.NAVIGATION_SCREEN_UNIQUE_ID + " = '" + navuisd + "'" + " AND " + OMSDatabaseConstants.CONFIGDB_APPID   + " = '" + appId
-                            + "'" + " AND "
-                            + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
-                            + " <> '1'",
-					null, null, null, null);
-
-			if(navigationScreenCursor.moveToFirst()){
-				parentScreenOrder =  navigationScreenCursor
-						.getInt(navigationScreenCursor
-								.getColumnIndex(OMSDatabaseConstants.NAVIGATION_PARENT_SCREEN_ORDER));
-			}
-		}
-		catch (Exception e){
-			e.printStackTrace();
-		}
-		return parentScreenOrder;
-	}
-
-    public NavigationItems getScreenInfoByScreenOrder(int screenOrder,int appId){
-        NavigationItems navigationItems = null;
-        ArrayList<NavigationItems> navigationdata = new ArrayList<NavigationItems>();
-        Cursor navigationScreenCursor = null;
-        try {
-            navigationScreenCursor = OMSDBManager.getConfigDB().query(
-                    OMSDatabaseConstants.NAVIGATION_SCREEN_TABLE_NAME,
-                    null,
-                    OMSDatabaseConstants.NAVIGATION_SCREEN_ORDER
-                            + "="
-                            + screenOrder
-                            + " and "
-                            + OMSDatabaseConstants.CONFIGDB_APPID
-                            + " = '"+appId+ "'" + " AND "
-                            + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
-                            + " <> '1'", null, null, null, null);
-            if(navigationScreenCursor.moveToFirst()){
-                navigationItems = new NavigationItems();
-                navigationItems.screentype = navigationScreenCursor
-                        .getString(navigationScreenCursor
-                                .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_TYPE));
-                navigationItems.screenorder = navigationScreenCursor
-                        .getInt(navigationScreenCursor
-                                .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_ORDER));
-                navigationItems.uniqueId = navigationScreenCursor
-                        .getString(navigationScreenCursor
-                                .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_UNIQUE_ID));
-                navigationItems.position = navigationScreenCursor
-                        .getInt(navigationScreenCursor
-                                .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_POSITION));
-                navigationItems.appId = navigationScreenCursor
-                        .getInt(navigationScreenCursor
-                                .getColumnIndex(OMSDatabaseConstants.CONFIGDB_APPID));
-          //      navigationdata.add(navigationItems);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    return navigationItems;
-    }
-
-
-    public NavigationItems getParentOnBack(String navuisd,int appId){
-        NavigationItems navItems = null;
-        int screenOrder = -1;
-        if(!TextUtils.isEmpty(navuisd) && appId!=-1){
-            screenOrder =   getScreenOrderForNavUsid(navuisd, appId);
-            Log.d(TAG,"Screen Order:::appId"+screenOrder+"  "+appId);
-            if(screenOrder!=-1){
-                navItems =  getScreenInfoByScreenOrder(screenOrder, appId);
-            }
-        }
-        return navItems;
-    }
+	
 	public NavigationItems getLoginScreenForApp ()
 	{
 		NavigationItems navigationItems = null;

@@ -87,7 +87,7 @@ public enum OMSMessages {
 			"showTable"), SHOW_EDIT("showEdit"), FILE_PATH("filePath"), ADD_TITLE(
 			"Add Data"),STYLE("style"), ADD_EVENT("addEvent"), IMAGE_NAMES("ALL_IMAGES_NAMES"),IMAGE_LOCAL("IMAGE_LOCAL"), DB_SCHEMA_NAME(
 			"schemaname"), SECTION_ITEM_NAME("sectionItemName"),OMS_TITLE("One Mobile Studio"),QUERY_PARAMETERS(
-					"queryparameters"),IS_BACK("isback"),
+					"queryparameters"),
 	/**
 	 * Json/XML Strings
 	 */

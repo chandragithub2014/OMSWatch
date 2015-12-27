@@ -98,16 +98,14 @@ public class OMSLoadScreenHelper {
          boolean showSplitView = navigationHelper.isSplitViewEnable(usid,
                     appId);
             Log.d(TAG, "SplitView from DB - Fragment Tabs" + showSplitView);*/
-			Log.d(TAG,"mcontainerId:::"+mContainerId);
             bundle = new Bundle();
             bundle.putInt(OMSMessages.SCREEN_ORDER.getValue(), screenOrder);
             bundle.putString(OMSMessages.UNIQUE_ID.getValue(), navUsid);
             bundle.putString(OMSMessages.TITLE.getValue(), headerTitle);
             bundle.putInt(OMSMessages.CUSTOM_CONTAINERID.getValue(),
-					customScreenContainerId);
+                    customScreenContainerId);
             bundle.putInt(OMSMessages.CONFIGAPP_ID.getValue(), appId);
             bundle.putBoolean(OMSMessages.SHOW_LOGOUT.getValue(), enableLogout);
-			bundle.putBoolean(OMSMessages.IS_BACK.getValue(),isMain);
 /*			bundle.putBoolean(OMSMessages.SCREEN_MODE.getValue(),
 					((OMSApplication.getInstance().isSplitView())));*/
             Fragment listFragment = OMSFactory.getInstance(OMSFactory.TemplateType.List,

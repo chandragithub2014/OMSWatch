@@ -838,7 +838,6 @@
                                 + appId + "'" + OMSMessages.AND.getValue() + SPACE
                                 + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
                                 + "='0'", null, null, null, null);
-                Log.d(TAG,"listScreenCursor size"+listScreenCursor.getCount());
 
                 if(listScreenCursor!=null){
                     if(listScreenCursor.moveToFirst()){
@@ -1264,7 +1263,7 @@
             return listItems;
         }
 
-    public HashMap<Integer,String> getListScreenChildMap(String listUsid,
+    public HashMap<Integer,String> getListScreenChilds(String listUsid,
                                                        int configDBAppId){
         HashMap<Integer,String> listChilds = new HashMap<Integer,String>();
         try{

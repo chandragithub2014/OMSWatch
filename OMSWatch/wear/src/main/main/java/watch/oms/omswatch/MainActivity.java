@@ -3,10 +3,7 @@ package watch.oms.omswatch;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 
 import java.util.ArrayList;
 
@@ -18,7 +15,7 @@ import watch.oms.omswatch.constants.OMSMessages;
 import watch.oms.omswatch.helpers.NavigationHelper;
 import watch.oms.omswatch.interfaces.OMSReceiveListener;
 
-public class MainActivity extends AppCompatActivity implements OMSReceiveListener{
+public class MainActivity extends Activity implements OMSReceiveListener{
 
     private final String TAG = this.getClass().getSimpleName();
 
@@ -27,21 +24,10 @@ public class MainActivity extends AppCompatActivity implements OMSReceiveListene
     private Context context = null;
     private NavigationHelper navigationHelper = null;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        android.support.v7.widget.Toolbar toolbar = ( android.support.v7.widget.Toolbar)findViewById(R.id.toolbar);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        toolbar.setTitle("OMS Watch");
-        setSupportActionBar(toolbar);
-
-        LayoutInflater mInflater= LayoutInflater.from(getApplicationContext());
-        View mCustomView = mInflater.inflate(R.layout.toolbar_custom_view, null);
-        toolbar.addView(mCustomView);
-
         context = MainActivity.this;
         OMSDBManager manager = new OMSDBManager(MainActivity.this,
                 MainActivity.this);
@@ -51,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements OMSReceiveListene
 
     @Override
     public void receiveResult(String result) {
-        Log.d(TAG,"receiveResult MainActivity");
         if (result.contains(OMSMessages.TRANS_DATABASE_SUCCESS.getValue())) {
 				/*if(OMSConstants.USE_FOOTER_LOAD_TEXT){
 				loadingText.setText(R.string.app_load_policyDB);
@@ -60,14 +45,11 @@ public class MainActivity extends AppCompatActivity implements OMSReceiveListene
 				//pd.setTitle(R.string.app_logo_bottom);
 				if(pd!=null) pd.setTitle(Html.fromHtml("<b><H1>"+this.getResources().getString(R.string.app_logo_bottom)+"</H1></b>"));
 				}*/
-            Log.d(TAG,"OMSDBManager.checkNetworkConnectivity()"+OMSDBManager.checkNetworkConnectivity());
             if (OMSDBManager.checkNetworkConnectivity()) {
                 loadIntialScreen();
                 // AppMonitor START
                 Log.d(TAG, "******************startPerformanceMonitoring");
 
-            }else{
-                loadIntialScreen();
             }
         }
     }

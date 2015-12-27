@@ -4,12 +4,16 @@
     import android.app.Activity;
     import android.os.Bundle;
     import android.app.Fragment;
+    import android.support.v7.widget.Toolbar;
     import android.support.wearable.view.WearableListView;
+    import android.text.TextUtils;
     import android.util.Log;
     import android.view.LayoutInflater;
     import android.view.View;
     import android.view.ViewGroup;
+    import android.widget.ImageView;
 
+    import java.util.ArrayList;
     import java.util.HashMap;
     import java.util.List;
 
@@ -26,6 +30,7 @@
     import watch.oms.omswatch.constants.OMSMessages;
     import watch.oms.omswatch.helpers.ListHelper;
     import watch.oms.omswatch.helpers.NavigationHelper;
+    import watch.oms.omswatch.helpers.OMSTransHelper;
 
     /**
      * A simple {@link Fragment} subclass.
@@ -53,13 +58,14 @@
         private int configDBAppId;
         private ListHelper listDBHelper = null;
         private NavigationHelper navigationHelper = null;
-
+        private OMSTransHelper transHelper;
         View listView = null;
         WearableListView wearableListView;
 
         HashMap<Integer, String> listChilds;
         int clickedListPosition = -1;
         private Activity activityContext = null;
+        private boolean isBack = true;
         public ListScreenFragment() {
             // Required empty public constructor
         }
@@ -94,6 +100,8 @@
                         .getValue());
                 configDBAppId = getArguments().getInt(OMSMessages.CONFIGAPP_ID
                         .getValue());
+                isBack  =  getArguments().getBoolean(OMSMessages.IS_BACK
+                        .getValue());
 
 
             }
@@ -104,6 +112,19 @@
                                  Bundle savedInstanceState) {
             // Inflate the layout for this fragment
             Log.d(TAG, "OnCreateView");
+            Toolbar mToolBar = (Toolbar)getActivity().findViewById(R.id.toolbar);
+            ImageView back_img = (ImageView)mToolBar.findViewById(R.id.back);
+            if(!isBack) {
+                back_img.setVisibility(View.VISIBLE);
+            }else{
+                back_img.setVisibility(View.INVISIBLE);
+            }
+            back_img.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    inBackPressed(navUsid, configDBAppId);
+                }
+            });
             initializeHelpers();
 
             if (container != null) {
@@ -117,6 +138,7 @@
             listView = inflater.inflate(R.layout.fragment_list_screen, container, false);
 
             try {
+                Log.d(TAG, "navUsid:::"+navUsid+"Configdbappid::"+configDBAppId);
                 listScreenMap = listDBHelper.getListScreenDetailsMap(navUsid,
                         configDBAppId);
             } catch (Exception e) {
@@ -126,16 +148,17 @@
             wearableListView =
                     (WearableListView) listView.findViewById(R.id.watch_List);
             wearableListView.setClickListener(mClickListener);
+if(listScreenMap!=null && listScreenMap.size()>0) {
+    if (listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HETEROGENEOUS_TYPE)) {
+        listChilds = fetchChildsForList();
+        prepareDataForHeterogeneousList();
 
-            if (listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HETEROGENEOUS_TYPE)) {
-                listChilds = fetchChildsForList();
-                prepareDataForHeterogeneousList();
-
-            } else if (listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HOMOGENEOUS_TYPE)) {
-
-                prepareDataforHomogeneousList();
-            }
-
+    } else if (listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HOMOGENEOUS_TYPE)) {
+        if (!TextUtils.isEmpty(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME))) {
+            prepareDataforHomogeneousList(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME));
+        }
+    }
+}
             WearableListView.ItemDecoration itemDecoration =
                     new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
             wearableListView.addItemDecoration(itemDecoration);
@@ -146,6 +169,7 @@
         private void initializeHelpers() {
             listDBHelper = new ListHelper();
             navigationHelper = new NavigationHelper();
+             transHelper = new OMSTransHelper(activityContext);
         }
 
 
@@ -171,9 +195,62 @@
         return  listChilds;
     }
 
-        private void prepareDataforHomogeneousList(){
+        private void prepareDataforHomogeneousList(String dataTableName){
 
+
+            List<ListScreenItemsDTO>  homogeneousData = fetchListItemsFromDB();
+            Log.d(TAG,"Homogeneous Data Size::"+homogeneousData.size());
+            List<String>columnList = new ArrayList<String>();
+            HashMap<String,String> columnNameMap = new HashMap<String,String>();
+            if(homogeneousData!=null && homogeneousData.size()>0) {
+             for(int i = 0 ; i<homogeneousData.size(); i++) {
+
+                 if(!TextUtils.isEmpty(homogeneousData.get(i).getImageURL())) {
+                     columnList.add(homogeneousData.get(i).getImageURL());
+                     columnNameMap.put(homogeneousData.get(i).getImageURL(), "imageURL");
+                 }
+                 if(!TextUtils.isEmpty(homogeneousData.get(i).getPrimaryText())) {
+                     columnList.add(homogeneousData.get(i).getPrimaryText());
+                     columnNameMap.put(homogeneousData.get(i).getPrimaryText(), "primaryText");
+                 }
+                 if(!TextUtils.isEmpty(homogeneousData.get(i).getSecondaryText())) {
+                     columnList.add(homogeneousData.get(i).getSecondaryText());
+                     columnNameMap.put(homogeneousData.get(i).getSecondaryText(), "secondaryText");
+                 }
+             }
+            }
+
+            List<ListScreenItemsDTO> updatedScreenItems = new ArrayList<ListScreenItemsDTO>();
+            if(columnList.size()>0){
+                List<HashMap<String,String>> dataMapList =      transHelper.fetchTransDBData(columnList, dataTableName,columnNameMap);
+
+                for(int i=0;i<dataMapList.size();i++){
+                    HashMap<String,String> transMap = dataMapList.get(i);
+                    ListScreenItemsDTO temp = new ListScreenItemsDTO();
+                    for(int j=0;j<homogeneousData.size();j++){
+
+                        temp.setPosition(homogeneousData.get(j).getPosition());
+                        temp.setChildNavUsid(homogeneousData.get(j).getChildNavUsid());
+                        if(transMap.get("primaryText")!=null) {
+                            temp.setPrimaryText(transMap.get("primaryText"));
+                        }
+                        if(transMap.get("secondaryText")!=null) {
+                            temp.setSecondaryText(transMap.get("secondaryText"));
+                        }
+                        if(transMap.get("imageURL")!=null) {
+                            temp.setImageURL(transMap.get("imageURL"));
+                        }
+                    }
+                    updatedScreenItems.add(temp);
+                }
+
+                if(updatedScreenItems!=null && updatedScreenItems.size()>0){
+                    setAdapter(updatedScreenItems);
+                }
+            }
         }
+
+
 
         private void setAdapter(List<ListScreenItemsDTO> heterogeneousData){
             wearableListView.setAdapter(new OMSListAdapter(getActivity(), heterogeneousData));
@@ -234,7 +311,8 @@
                 Log.d("TAG","Child SCREEN screenorder:::"+  navigationItems.screenorder);
                 Log.d("TAG","Child SCREEN appId:::"+  navigationItems.appId);
 
-               /* if(navigationItems!=null){
+
+               if(navigationItems!=null){
                     new OMSLoadScreenHelper(activityContext, mContainerId)
                             .loadTargetScreen(navigationItems.screentype,
                                     navigationItems.parent_id,
@@ -243,7 +321,33 @@
                                     null, null, "",
                                     OMSDefaultValues.NONE_DEF_CNT.getValue(),
                                     navigationItems.appId);
-                }*/
+                }
+            }
+        }
+
+
+        private void inBackPressed(String navUsid,int appId){
+            NavigationItems navigationItems =  navigationHelper.getParentOnBack(navUsid,appId);
+        if(navigationItems!=null) {
+                Log.d("TAG", "Child SCREEN screentype:::" + navigationItems.screentype);
+                Log.d("TAG", "Child SCREEN parent_id:::" + navigationItems.parent_id);
+                Log.d("TAG", "Child SCREEN uniqueId:::" + navigationItems.uniqueId);
+                Log.d("TAG", "Child SCREEN screenorder:::" + navigationItems.screenorder);
+                Log.d("TAG", "Child SCREEN appId:::" + navigationItems.appId);
+
+            if(navigationItems.parent_id == 0){
+                isBack = true;
+            }
+            if(navigationItems!=null){
+                new OMSLoadScreenHelper(activityContext, mContainerId)
+                        .loadTargetScreen(navigationItems.screentype,
+                                navigationItems.parent_id,
+                                navigationItems.uniqueId,
+                                navigationItems.screenorder, isBack  ,
+                                null, null, "",
+                                OMSDefaultValues.NONE_DEF_CNT.getValue(),
+                                navigationItems.appId);
+            }
             }
         }
 
