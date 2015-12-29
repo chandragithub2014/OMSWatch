@@ -9,6 +9,7 @@ public class ListScreenItemsDTO {
     private String imageURL;
     private String childNavUsid;
     private int position;
+    private int clickedPosition;
 
     public String getPrimaryText() {
         return primaryText;
@@ -48,5 +49,13 @@ public class ListScreenItemsDTO {
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    public int getClickedPosition() {
+        return clickedPosition;
+    }
+
+    public void setClickedPosition(int clickedPosition) {
+        this.clickedPosition = clickedPosition;
     }
 }

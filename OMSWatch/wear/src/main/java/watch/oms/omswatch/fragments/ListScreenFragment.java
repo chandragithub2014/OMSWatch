@@ -16,6 +16,7 @@
     import java.util.ArrayList;
     import java.util.HashMap;
     import java.util.List;
+    import java.util.Map;
 
     import watch.oms.omswatch.OMSDTO.ListScreenItemsDTO;
     import watch.oms.omswatch.OMSDTO.NavigationItems;
@@ -32,6 +33,7 @@
     import watch.oms.omswatch.helpers.NavigationHelper;
     import watch.oms.omswatch.helpers.OMSTransHelper;
 
+    /**
     /**
      * A simple {@link Fragment} subclass.
      * Use the {@link ListScreenFragment#} factory method to
@@ -66,6 +68,12 @@
         int clickedListPosition = -1;
         private Activity activityContext = null;
         private boolean isBack = true;
+
+        List<String> columnList;
+        HashMap<String,String> columnNameMap;
+        String filterColVal="";
+
+        private String retainWhereString = null;
         public ListScreenFragment() {
             // Required empty public constructor
         }
@@ -155,6 +163,12 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
 
     } else if (listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HOMOGENEOUS_TYPE)) {
         if (!TextUtils.isEmpty(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME))) {
+            //Get RetainMap
+            Map<String, String> mapRetainClauses = OMSApplication.getInstance().getRetainWhereClause();
+            if(mapRetainClauses != null && !mapRetainClauses.isEmpty()){
+                retainWhereString = mapRetainClauses.get(navUsid);
+            }
+            //
             prepareDataforHomogeneousList(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME));
         }
     }
@@ -200,8 +214,8 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
 
             List<ListScreenItemsDTO>  homogeneousData = fetchListItemsFromDB();
             Log.d(TAG,"Homogeneous Data Size::"+homogeneousData.size());
-            List<String>columnList = new ArrayList<String>();
-            HashMap<String,String> columnNameMap = new HashMap<String,String>();
+           columnList = new ArrayList<String>();
+           columnNameMap = new HashMap<String,String>();
             if(homogeneousData!=null && homogeneousData.size()>0) {
              for(int i = 0 ; i<homogeneousData.size(); i++) {
 
@@ -222,7 +236,8 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
 
             List<ListScreenItemsDTO> updatedScreenItems = new ArrayList<ListScreenItemsDTO>();
             if(columnList.size()>0){
-                List<HashMap<String,String>> dataMapList =      transHelper.fetchTransDBData(columnList, dataTableName,columnNameMap);
+          //      List<HashMap<String,String>> dataMapList =      transHelper.fetchTransDBData(columnList, dataTableName,columnNameMap);
+                List<HashMap<String,String>> dataMapList =      transHelper.fetchTransDBDataforHomogeneousList(columnList, dataTableName,columnNameMap,retainWhereString);
 
                 for(int i=0;i<dataMapList.size();i++){
                     HashMap<String,String> transMap = dataMapList.get(i);
@@ -284,12 +299,45 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                                 String.format("You selected item #%s",
                                         viewHolder.getLayoutPosition()+1),
                                 Toast.LENGTH_SHORT).show();*/
+                        if (listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HETEROGENEOUS_TYPE)) {
                         WearableListItemLayout listViewRowView = (WearableListItemLayout) viewHolder.itemView;
                         ListScreenItemsDTO temp = (ListScreenItemsDTO) listViewRowView.getTag();
                         Log.d(TAG,"Position of selected List:::"+temp.getPosition());
                         clickedListPosition = temp.getPosition();
                         lauchChildForList(clickedListPosition);
+                        }else if(listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HOMOGENEOUS_TYPE)) {
 
+                            WearableListItemLayout listViewRowView = (WearableListItemLayout) viewHolder.itemView;
+                            ListScreenItemsDTO temp = (ListScreenItemsDTO) listViewRowView.getTag();
+                            clickedListPosition = viewHolder.getAdapterPosition();
+                            Log.d(TAG,"Clicked Position of Homegen List:::"+clickedListPosition);
+                            //Get Homogeneous Child
+                            NavigationItems navigationItems =  getChildForHomogeneousList(navUsid,screenOrder);
+                            if(navigationItems!=null) {
+                                if (!TextUtils.isEmpty(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME))) {
+                                    filterColVal = transHelper.fetchFilterColumnValFromTransDBData(columnList, listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME), columnNameMap, listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME), clickedListPosition);
+                                    Log.d(TAG, "Clicked Position filterColVal:::" + filterColVal);
+                                    OMSApplication.getInstance().setGlobalFilterColumnVal(filterColVal);
+
+                                    //Retain Where Query
+
+                                    if(!TextUtils.isEmpty(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME)) && !TextUtils.isEmpty(filterColVal)){
+                                         String filterColName = listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME);
+                                         String value = null;
+                                        if(!TextUtils.isEmpty(retainWhereString)){
+                                            value =  retainWhereString +" AND "+filterColName+"='"+filterColVal+"'";
+                                        } else {
+                                            value =  filterColName+"='"+filterColVal+"'";
+                                        }
+
+                                        OMSApplication.getInstance().getRetainWhereClause().put(navigationItems.uniqueId,value);
+                                        launchChildForHomogeneousList(navigationItems);
+                                    }
+
+                                    //End Retain
+                                }
+                            }
+                        }
                     }
 
                     @Override
@@ -299,7 +347,15 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                     }
                 };
 
-
+         private NavigationItems getChildForHomogeneousList(String navUsid,int screenOrder){
+             NavigationItems navigationItems = null;
+             try {
+                 navigationItems = navigationHelper.getHomogeneousChild(screenOrder, configDBAppId);
+             }catch (Exception e){
+                 e.printStackTrace();
+             }
+             return navigationItems;
+         }
         private void lauchChildForList(int position){
             if(listChilds!=null && listChilds.size()>0){
                 String childNavUsid = listChilds.get(position);
@@ -309,7 +365,7 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                 Log.d("TAG","Child SCREEN parent_id:::"+ navigationItems.parent_id);
                 Log.d("TAG","Child SCREEN uniqueId:::"+ navigationItems.uniqueId);
                 Log.d("TAG","Child SCREEN screenorder:::"+  navigationItems.screenorder);
-                Log.d("TAG","Child SCREEN appId:::"+  navigationItems.appId);
+                Log.d("TAG", "Child SCREEN appId:::" + navigationItems.appId);
 
 
                if(navigationItems!=null){
@@ -326,6 +382,18 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
         }
 
 
+        private void launchChildForHomogeneousList(NavigationItems navigationItems){
+            if(navigationItems!=null){
+                new OMSLoadScreenHelper(activityContext, mContainerId)
+                        .loadTargetScreen(navigationItems.screentype,
+                                navigationItems.parent_id,
+                                navigationItems.uniqueId,
+                                navigationItems.screenorder, false,
+                                null, null, "",
+                                OMSDefaultValues.NONE_DEF_CNT.getValue(),
+                                navigationItems.appId);
+            }
+        }
         private void inBackPressed(String navUsid,int appId){
             NavigationItems navigationItems =  navigationHelper.getParentOnBack(navUsid,appId);
         if(navigationItems!=null) {

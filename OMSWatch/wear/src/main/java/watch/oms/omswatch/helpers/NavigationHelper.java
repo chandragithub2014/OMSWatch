@@ -40,6 +40,64 @@ public class NavigationHelper {
 	//private final String NAVIGATION_DRAWER = "Navigation Drawer";
 
 
+    public NavigationItems getHomogeneousChild(int parentScreenOrder, int appId) {
+
+        Log.d(TAG, "method getScreenInfoByParentId, parentScreenOrder:"
+                + parentScreenOrder);
+
+        NavigationItems navigationItems = null;
+        ArrayList<NavigationItems> navigationdata = new ArrayList<NavigationItems>();
+        Cursor navigationScreenCursor = null;
+        try {
+            navigationScreenCursor = OMSDBManager.getConfigDB().query(
+                    OMSDatabaseConstants.NAVIGATION_SCREEN_TABLE_NAME,
+                    null,
+                    OMSDatabaseConstants.NAVIGATION_PARENT_SCREEN_ORDER
+                            + "="
+                            + parentScreenOrder
+                            + " and "
+                            + OMSDatabaseConstants.CONFIGDB_APPID
+                            + " = '"+appId+ "'" + "AND "
+                            + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
+                            + " <> '1'", null, null, null, null);
+
+            if (navigationScreenCursor.moveToFirst()) {
+               // do {
+                    navigationItems = new NavigationItems();
+                    navigationItems.screentype = navigationScreenCursor
+                            .getString(navigationScreenCursor
+                                    .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_TYPE));
+                    navigationItems.screenorder = navigationScreenCursor
+                            .getInt(navigationScreenCursor
+                                    .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_ORDER));
+                    navigationItems.uniqueId = navigationScreenCursor
+                            .getString(navigationScreenCursor
+                                    .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_UNIQUE_ID));
+                    navigationItems.position = navigationScreenCursor
+                            .getInt(navigationScreenCursor
+                                    .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_POSITION));
+                    navigationItems.appId = navigationScreenCursor
+                            .getInt(navigationScreenCursor
+                                    .getColumnIndex(OMSDatabaseConstants.CONFIGDB_APPID));
+                    //navigationdata.add(navigationItems);
+                //} while (navigationScreenCursor.moveToNext());
+            }
+            navigationScreenCursor.close();
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG,
+                    "Error occurred in method getScreenInfoByParentId for input parameter parentScreenId["
+                            + parentScreenOrder + "]. Error is:" + e.getMessage());
+            e.printStackTrace();
+        }finally{
+            if(navigationScreenCursor!=null){
+                navigationScreenCursor.close();
+            }
+        }
+        return navigationItems;
+    }
+
+
+
 
 	public int  getScreenOrderForNavUsid(String navuisd,int appId){
 		Cursor navigationScreenCursor = null;
@@ -88,16 +146,19 @@ public class NavigationHelper {
                                 .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_TYPE));
                 navigationItems.screenorder = navigationScreenCursor
                         .getInt(navigationScreenCursor
-                                .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_ORDER));
+								.getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_ORDER));
                 navigationItems.uniqueId = navigationScreenCursor
                         .getString(navigationScreenCursor
-                                .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_UNIQUE_ID));
+								.getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_UNIQUE_ID));
                 navigationItems.position = navigationScreenCursor
                         .getInt(navigationScreenCursor
-                                .getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_POSITION));
+								.getColumnIndex(OMSDatabaseConstants.NAVIGATION_SCREEN_POSITION));
                 navigationItems.appId = navigationScreenCursor
                         .getInt(navigationScreenCursor
                                 .getColumnIndex(OMSDatabaseConstants.CONFIGDB_APPID));
+				navigationItems.parent_id =  navigationScreenCursor
+						.getInt(navigationScreenCursor
+								.getColumnIndex(OMSDatabaseConstants.NAVIGATION_PARENT_SCREEN_ORDER));
           //      navigationdata.add(navigationItems);
             }
         }catch (Exception e){

@@ -851,13 +851,13 @@
                         }
                         */
 
-                        /*if (listScreenCursor
+                        if (listScreenCursor
                                 .getString(listScreenCursor
                                         .getColumnIndex(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME)) != null) {
                             listDetailMap.put(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME, listScreenCursor
                                     .getString(listScreenCursor
                                             .getColumnIndex(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME)));
-                        }*/
+                        }
 
 
                         if(listScreenCursor
