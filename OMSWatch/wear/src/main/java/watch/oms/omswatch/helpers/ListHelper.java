@@ -941,6 +941,45 @@
                         }
 
 
+                            {
+                                Log.d(TAG, "Retain where clause in Helper ::;" + Integer.toString(listScreenCursor
+                                                .getInt(listScreenCursor
+                                                        .getColumnIndex(OMSDatabaseConstants.RETAIN_WHERE_CLAUSE))));
+                                        listDetailMap.put(OMSDatabaseConstants.RETAIN_WHERE_CLAUSE, Integer.toString(listScreenCursor
+                                                .getInt(listScreenCursor
+                                                        .getColumnIndex(OMSDatabaseConstants.RETAIN_WHERE_CLAUSE))));
+
+                            }
+
+
+                        {
+                            listDetailMap.put(OMSDatabaseConstants.USE_WHERE, Integer.toString(listScreenCursor
+                                    .getInt(listScreenCursor
+                                            .getColumnIndex(OMSDatabaseConstants.USE_WHERE))));
+
+                        }
+
+
+
+                        if (listScreenCursor
+                                .getString(listScreenCursor
+                                        .getColumnIndex(OMSDatabaseConstants.WHERE_COLUMN_NAME)) != null) {
+                            listDetailMap.put(OMSDatabaseConstants.WHERE_COLUMN_NAME, listScreenCursor
+                                    .getString(listScreenCursor
+                                            .getColumnIndex(OMSDatabaseConstants.WHERE_COLUMN_NAME)));
+                        }
+
+
+
+                        if (listScreenCursor
+                                .getString(listScreenCursor
+                                        .getColumnIndex(OMSDatabaseConstants.WHERE_CONSTANT)) != null) {
+                            listDetailMap.put(OMSDatabaseConstants.WHERE_CONSTANT, listScreenCursor
+                                    .getString(listScreenCursor
+                                            .getColumnIndex(OMSDatabaseConstants.WHERE_CONSTANT)));
+                        }
+
+
                     /*	if (listScreenCursor
                                 .getString(listScreenCursor
                                         .getColumnIndex(OMSDatabaseConstants.LIST_SCREEN_SEARCH_COLUMN_NAME)) != null) {
@@ -976,41 +1015,11 @@
                         }
 
 
-                        {
-                            listDetailMap.put(OMSDatabaseConstants.USE_WHERE, Integer.toString(listScreenCursor
-                                    .getInt(listScreenCursor
-                                            .getColumnIndex(OMSDatabaseConstants.USE_WHERE))));
-
-                        }
 
 
 
-                        if (listScreenCursor
-                                .getString(listScreenCursor
-                                        .getColumnIndex(OMSDatabaseConstants.WHERE_COLUMN_NAME)) != null) {
-                            listDetailMap.put(OMSDatabaseConstants.WHERE_COLUMN_NAME, listScreenCursor
-                                    .getString(listScreenCursor
-                                            .getColumnIndex(OMSDatabaseConstants.WHERE_COLUMN_NAME)));
-                        }
 
 
-
-                        if (listScreenCursor
-                                .getString(listScreenCursor
-                                        .getColumnIndex(OMSDatabaseConstants.WHERE_CONSTANT)) != null) {
-                            listDetailMap.put(OMSDatabaseConstants.WHERE_CONSTANT, listScreenCursor
-                                    .getString(listScreenCursor
-                                            .getColumnIndex(OMSDatabaseConstants.WHERE_CONSTANT)));
-                        }
-
-
-
-                        {
-                            listDetailMap.put(OMSDatabaseConstants.RETAIN_WHERE_CLAUSE, Integer.toString(listScreenCursor
-                                    .getInt(listScreenCursor
-                                            .getColumnIndex(OMSDatabaseConstants.RETAIN_WHERE_CLAUSE))));
-
-                        }
 
                     {
                             listDetailMap.put(OMSDatabaseConstants.LIST_SCREEN_SHOW_LOCATION_SEARCH, Integer.toString(listScreenCursor

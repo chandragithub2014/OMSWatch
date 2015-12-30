@@ -74,6 +74,11 @@
         String filterColVal="";
 
         private String retainWhereString = null;
+        private boolean retainWhere = false;
+
+        private String whereColumnName = null;
+        private String whereColumnConstant = null;
+
         public ListScreenFragment() {
             // Required empty public constructor
         }
@@ -168,6 +173,11 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
             if(mapRetainClauses != null && !mapRetainClauses.isEmpty()){
                 retainWhereString = mapRetainClauses.get(navUsid);
             }
+            if(Integer.parseInt(listScreenMap.get(OMSDatabaseConstants.USE_WHERE))> OMSDefaultValues.MIN_INDEX_INT
+                    .getValue()){
+                whereColumnName = (listScreenMap.get(OMSDatabaseConstants.WHERE_COLUMN_NAME));
+                whereColumnConstant =(listScreenMap.get(OMSDatabaseConstants.WHERE_CONSTANT));
+            }
             //
             prepareDataforHomogeneousList(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME));
         }
@@ -237,7 +247,7 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
             List<ListScreenItemsDTO> updatedScreenItems = new ArrayList<ListScreenItemsDTO>();
             if(columnList.size()>0){
           //      List<HashMap<String,String>> dataMapList =      transHelper.fetchTransDBData(columnList, dataTableName,columnNameMap);
-                List<HashMap<String,String>> dataMapList =      transHelper.fetchTransDBDataforHomogeneousList(columnList, dataTableName,columnNameMap,retainWhereString);
+                List<HashMap<String,String>> dataMapList =      transHelper.fetchTransDBDataforHomogeneousList(columnList, dataTableName,columnNameMap,retainWhereString,whereColumnName, whereColumnConstant);
 
                 for(int i=0;i<dataMapList.size();i++){
                     HashMap<String,String> transMap = dataMapList.get(i);
@@ -320,22 +330,28 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                                     OMSApplication.getInstance().setGlobalFilterColumnVal(filterColVal);
 
                                     //Retain Where Query
-
-                                    if(!TextUtils.isEmpty(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME)) && !TextUtils.isEmpty(filterColVal)){
-                                         String filterColName = listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME);
-                                         String value = null;
-                                        if(!TextUtils.isEmpty(retainWhereString)){
-                                            value =  retainWhereString +" AND "+filterColName+"='"+filterColVal+"'";
+                                    retainWhere = Integer.parseInt(listScreenMap.get(OMSDatabaseConstants.RETAIN_WHERE_CLAUSE)) != OMSDefaultValues.MIN_INDEX_INT
+                                            .getValue();
+                                    Log.d(TAG,"Retain Where::::"+retainWhere);
+                                    if(retainWhere){
+                                    if(!TextUtils.isEmpty(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME)) && !TextUtils.isEmpty(filterColVal)) {
+                                        String filterColName = listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_FILTER_COLUMN_NAME);
+                                        String value = null;
+                                        if (!TextUtils.isEmpty(retainWhereString)) {
+                                            value = retainWhereString + " AND " + filterColName + "='" + filterColVal + "'";
                                         } else {
-                                            value =  filterColName+"='"+filterColVal+"'";
+                                            value = filterColName + "='" + filterColVal + "'";
                                         }
 
-                                        OMSApplication.getInstance().getRetainWhereClause().put(navigationItems.uniqueId,value);
-                                        launchChildForHomogeneousList(navigationItems);
+                                        OMSApplication.getInstance().getRetainWhereClause().put(navigationItems.uniqueId, value);
                                     }
+                                    }
+                                }
+                                        launchChildForHomogeneousList(navigationItems);
+
 
                                     //End Retain
-                                }
+
                             }
                         }
                     }

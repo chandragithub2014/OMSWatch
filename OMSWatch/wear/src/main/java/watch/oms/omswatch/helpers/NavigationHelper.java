@@ -60,6 +60,7 @@ public class NavigationHelper {
                             + " = '"+appId+ "'" + "AND "
                             + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
                             + " <> '1'", null, null, null, null);
+			Log.d(TAG,"cursor length in getHomogeneousChild()"+navigationScreenCursor.getCount());
 
             if (navigationScreenCursor.moveToFirst()) {
                // do {

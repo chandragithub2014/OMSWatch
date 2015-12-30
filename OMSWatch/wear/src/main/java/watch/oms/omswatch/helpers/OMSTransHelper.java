@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import watch.oms.omswatch.WatchDB.TransDatabaseUtil;
+import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
 
 /**
@@ -68,12 +69,27 @@ public class OMSTransHelper {
         return transHashList;
     }
 
-    public List<HashMap<String,String>> fetchTransDBDataforHomogeneousList(List<String> colsList,String dataTableName,  HashMap<String,String> columnNameMap ,String retainWhereClause){
+    public List<HashMap<String,String>> fetchTransDBDataforHomogeneousList(List<String> colsList,String dataTableName,  HashMap<String,String> columnNameMap ,String retainWhereClause,String whereClauseColumnName, String whereClauseConstant){
         String selection = null;
         Cursor transCursor = null;
         String[] colArr = new String[colsList.size()];
         colArr = colsList.toArray(colArr);
         //      HashMap<String,String> transDataHash = new HashMap<String,String>();
+        if (whereClauseColumnName != null
+                && whereClauseColumnName.length() > 0) {
+            if (whereClauseConstant != null
+                    && whereClauseConstant.length() > 0) {
+                selection = whereClauseColumnName + " = " + "'"
+                        + whereClauseConstant + "'";
+            } else {
+                selection = whereClauseColumnName
+                        + " = "
+                        + "'"
+                        + OMSApplication.getInstance()
+                        .getGlobalFilterColumnVal() + "'";
+            }
+        }
+
         if (selection != null) {
             selection = selection + " AND "
                     + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
