@@ -31,6 +31,7 @@ import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
 import watch.oms.omswatch.constants.OMSDefaultValues;
 import watch.oms.omswatch.constants.OMSMessages;
+import watch.oms.omswatch.fragments.MultiFormFragment;
 import watch.oms.omswatch.helpers.NavigationHelper;
 
 
@@ -124,7 +125,22 @@ public class OMSLoadScreenHelper {
                         .addToBackStack(OMSMessages.NULL_STRING.getValue())
                         .commit();
             }
-        }
+        }else if (screenType
+				.equalsIgnoreCase(OMSConstants.MULTI_FORM_SCREEN_TYPE) || screenType.equalsIgnoreCase("Form")) {
+            Fragment multiFormScreenFragment = OMSFactory.getInstance(
+                    OMSFactory.TemplateType.MultiForm, navUsid);
+            bundle = new Bundle();
+            bundle.putString(OMSMessages.UNIQUE_ID.getValue(), navUsid);
+            bundle.putInt(OMSMessages.CONFIGAPP_ID.getValue(), appId);
+            bundle.putInt(OMSMessages.CUSTOM_CONTAINERID.getValue(),
+                    customScreenContainerId);
+            bundle.putBoolean(OMSMessages.IS_LOADSCREEN.getValue(), true);
+
+            multiFormScreenFragment.setArguments(bundle);
+            fm.beginTransaction().replace(mContainerId, multiFormScreenFragment)
+                    .addToBackStack(OMSMessages.NULL_STRING.getValue())
+                    .commit();
+		}
 			//
 			/*if (isMain) {
 				if (!(customScreenContainerId != OMSDefaultValues.NONE_DEF_CNT

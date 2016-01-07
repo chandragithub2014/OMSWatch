@@ -430,7 +430,7 @@ public class OMSConstants {
 	public static final String S_BACKSPACE = "\\s";
 	
 	public static final boolean IS_GRID_FORM_ENABLED=true;
-	public static int GRID_FORM_ROW_COUNT=16;
+	public static int GRID_FORM_ROW_COUNT=10;
 	
 	public static final String LOGIN_SCREEN_SUCCESS = "loginsuccess";
 	public static final String LOGIN_SCREEN_FAILURE = "loginfailure";

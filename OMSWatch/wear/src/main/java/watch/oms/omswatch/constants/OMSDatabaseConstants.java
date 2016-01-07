@@ -686,8 +686,8 @@ public class OMSDatabaseConstants {
 	public static final String MULTI_FORM_SCREEN_ITEMS_COLUMN4_IS_DELETE = "column4isdelete";
 	
 	public static final String MULTI_FORM_SCREEN_ITEMS_ROW_INDEX = "rowindex";
-	public static final String MULTI_FORM_SCREEN_GRID_ITEMS_TABLE = "multiformgridscreenitems";
-	public static final String MULTI_FORM_SCREEN_GRID_TABLE ="multiformgridscreen";
+	public static final String MULTI_FORM_SCREEN_GRID_ITEMS_TABLE = "watchmultiformscreenitems";
+	public static final String MULTI_FORM_SCREEN_GRID_TABLE ="watchmultiform";
 	// TableScreen related constants
 	public static final String TABLE_SCREEN_TABLE_NAME = "TableScreen";
 	public static final String TABLE_SCREEN_NAVIGATION_UNIQUE_ID = "navusid";

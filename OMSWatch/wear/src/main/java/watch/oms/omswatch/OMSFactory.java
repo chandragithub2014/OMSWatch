@@ -24,6 +24,7 @@ import android.util.Log;
 
 import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.fragments.ListScreenFragment;
+import watch.oms.omswatch.fragments.MultiFormFragment;
 
 
 public class OMSFactory {
@@ -48,11 +49,19 @@ public class OMSFactory {
 					frag = com.cognizant.oms.automatedtest.TestListScreen.newInstance();*/
 				break;
 
+
 			case ListNavigation:
 				/*if(!OMSConstants.IS_AUTO_DEBUG_ENABLED)
 					frag = com.cognizant.oms.uitemplate.listnavigation.ListNavigationScreenFragment.newInstance();
 				else
 					frag = com.cognizant.oms.automatedtest.TestNavigationListScreen.newInstance();*/
+				break;
+
+			case MultiForm:
+				if(!OMSConstants.IS_AUTO_DEBUG_ENABLED)
+					frag = MultiFormFragment.newInstance("", "");
+				/*else
+					frag = com.cognizant.oms.automatedtest.TestMultiForm.newInstance();*/
 				break;
 
 		/*	case Animation:
