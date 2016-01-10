@@ -2,7 +2,9 @@ package watch.oms.omswatch.fragments;
 
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.text.TextUtils;
@@ -15,15 +17,22 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Locale;
 
 import watch.oms.omswatch.R;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
 import watch.oms.omswatch.constants.OMSDefaultValues;
 import watch.oms.omswatch.constants.OMSMessages;
 import watch.oms.omswatch.helpers.MultiFormScreenHelper;
+import watch.oms.omswatch.interfaces.SendDataDialogListener;
+import watch.oms.omswatch.widgets.DatePickerDialogFragment;
+import watch.oms.omswatch.widgets.TimePickerDialogFragment;
 import watch.oms.omswatch.widgets.WatchButton;
 import watch.oms.omswatch.widgets.WatchEditText;
 import watch.oms.omswatch.widgets.WatchTextView;
@@ -33,7 +42,7 @@ import watch.oms.omswatch.widgets.WatchTextView;
  * Use the {@link MultiFormFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MultiFormFragment extends Fragment {
+public class MultiFormFragment extends Fragment implements SendDataDialogListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -75,6 +84,9 @@ public class MultiFormFragment extends Fragment {
             R.id.widget9,
             R.id.widget10
     };
+    SimpleDateFormat formatter;
+    int widgetId = -1;
+    int timePickerWidgetId = -1;
 
     public MultiFormFragment() {
         // Required empty public constructor
@@ -205,6 +217,32 @@ Log.d(TAG,"FormItems Hash Size:::"+formGridItemsHash.size());
                         else if(widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_BUTTON_TYPE)){
                             Button watchButton = WatchButton.getInstance().fetchButton(getActivity(), widgetName, widgetIds[i], null);
                             formParentLayout.addView(watchButton,i);
+                        }else if(widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_DATE_PICKER_TYPE)){
+
+                            widgetId  = widgetIds[i];
+                            TextView watchDatePickerLabel = WatchTextView.getInstance().fetchTextView(getActivity(), widgetName, widgetIds[i], null);
+
+                            formParentLayout.addView(watchDatePickerLabel,i);
+                            setDate(widgetId, "label");
+                            watchDatePickerLabel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    launchDatePicker(widgetId,"label");
+                                }
+                            });
+                        }else if(widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_GRID_TIME_PICKER)){
+
+                            timePickerWidgetId  = widgetIds[i];
+                            TextView watchDatePickerLabel = WatchTextView.getInstance().fetchTextView(getActivity(), widgetName, widgetIds[i], null);
+
+                            formParentLayout.addView(watchDatePickerLabel,i);
+                            setTime(timePickerWidgetId, "label");
+                            watchDatePickerLabel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    launchTimePicker(timePickerWidgetId,"label");
+                                }
+                            });
                         }
 
                     }
@@ -214,4 +252,94 @@ Log.d(TAG,"FormItems Hash Size:::"+formGridItemsHash.size());
     }
 
 
+    private void launchDatePicker(int widgetID,String widgetType){
+        if(widgetType.equalsIgnoreCase("Label")) {
+            TextView dateLabel = (TextView)view.findViewById(widgetID);
+            FragmentManager fm = getFragmentManager();
+            DatePickerDialogFragment dialogFragment = new DatePickerDialogFragment();
+            Bundle args = new Bundle();
+            args.putString("date", dateLabel.getText().toString());
+            args.putInt("widgetId",widgetID);
+            args.putSerializable("type",widgetType);
+            dialogFragment.setArguments(args);
+            dialogFragment.setTargetFragment(this, 0);
+            dialogFragment.show(fm, "Date Dialog Fragment");
+        }
+    }
+
+    private void launchTimePicker(int widgetID,String widgetType){
+        if(widgetType.equalsIgnoreCase("Label")) {
+            TextView dateLabel = (TextView)view.findViewById(widgetID);
+            FragmentManager fm = getFragmentManager();
+            TimePickerDialogFragment dialogFragment = new TimePickerDialogFragment();
+            Bundle args = new Bundle();
+            args.putString("time", dateLabel.getText().toString());
+            args.putInt("widgetId",widgetID);
+            args.putSerializable("type",widgetType);
+            dialogFragment.setArguments(args);
+            dialogFragment.setTargetFragment(this, 0);
+            dialogFragment.show(fm, "Time  Dialog Fragment");
+        }
+    }
+    private void setDate(int widgetId,String widgetType){
+        if(widgetType.equalsIgnoreCase("Label")){
+            TextView dateLabel = (TextView)view.findViewById(widgetId);
+            formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            Date dt = new Date();
+            dateLabel.setText(formatter.format(dt));
+            dateLabel.setTextColor(Color.parseColor("#999999"));
+
+        }
+    }
+
+    private void setTime(int widgetId,String widgetType){
+        if(widgetType.equalsIgnoreCase("Label")){
+            TextView dateLabel = (TextView)view.findViewById(widgetId);
+            formatter = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            Date dt = new Date();
+            dateLabel.setText(formatter.format(dt));
+            dateLabel.setTextColor(Color.parseColor("#999999"));
+
+        }
+    }
+    @Override
+    public void onFinishDialog(String inputText, String type, int widgetId) {
+        if(!TextUtils.isEmpty(inputText)) {
+            if (type.equalsIgnoreCase("Label")) {
+                TextView dateLabel = (TextView) view.findViewById(widgetId);
+                try {
+                    if (!TextUtils.isEmpty(inputText)) {
+                        //Oct 1,2015
+                        SimpleDateFormat dateFormat = new SimpleDateFormat(
+                                "MMM dd, yyyy", Locale.ENGLISH);
+                        // Date myDate;
+                        Date myDate = dateFormat.parse(inputText);
+                        dateLabel.setText(dateFormat.format(myDate));
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onFinishTimeDialog(String inputText, String type, int widgetId) {
+        Log.d(TAG,"onFinishTimeDialog:::"+inputText);
+        if(!TextUtils.isEmpty(inputText)){
+            if (type.equalsIgnoreCase("Label")) {
+                try{
+                    TextView TimeLabel = (TextView) view.findViewById(widgetId);
+                    //Oct 1,2015
+                    SimpleDateFormat dateFormat = new SimpleDateFormat(
+                            "HH:mm", Locale.ENGLISH);
+                    // Date myDate;
+                    Date myTime = dateFormat.parse(inputText);
+                    TimeLabel.setText(dateFormat.format(myTime));
+                }catch (ParseException e){
+                     e.printStackTrace();
+                }
+            }
+        }
+    }
 }
