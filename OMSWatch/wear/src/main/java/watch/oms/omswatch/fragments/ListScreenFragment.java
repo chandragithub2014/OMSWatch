@@ -12,6 +12,7 @@
     import android.view.View;
     import android.view.ViewGroup;
     import android.widget.ImageView;
+    import android.widget.TextView;
 
     import java.util.ArrayList;
     import java.util.HashMap;
@@ -127,6 +128,8 @@
             Log.d(TAG, "OnCreateView");
             Toolbar mToolBar = (Toolbar)getActivity().findViewById(R.id.toolbar);
             ImageView back_img = (ImageView)mToolBar.findViewById(R.id.back);
+           TextView saveForm = (TextView)mToolBar.findViewById(R.id.save_form);
+            saveForm.setVisibility(View.GONE);
             if(!isBack) {
                 back_img.setVisibility(View.VISIBLE);
             }else{

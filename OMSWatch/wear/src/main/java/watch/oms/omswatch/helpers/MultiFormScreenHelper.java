@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
+import watch.oms.omswatch.OMSDTO.PickerItems;
 import watch.oms.omswatch.WatchDB.OMSDBManager;
 import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
@@ -513,5 +514,93 @@ public class MultiFormScreenHelper {
         return rowIndexHashTable;
 
     }
+
+
+    /**
+     * Returns the picker data list that includes picker type,content ,data
+     * table name
+     *
+     * @param formUsid
+     * @param multiFormScreenItemsusid
+     * @param position
+     * @return
+     */
+    public List<PickerItems> getPickerData(String formUsid,
+                                           String multiFormScreenItemsusid, String position, int appId) {
+        List<PickerItems> pickerData = new ArrayList<PickerItems>();
+        Cursor pickerCursor = null;
+        try {
+            pickerCursor = OMSDBManager.getConfigDB().query(
+                    OMSDatabaseConstants.PICKER_CONFIG_TABLE_NAME,
+                    null,
+                    "formusid ='" + formUsid + "' and parentusid ='"
+                            + multiFormScreenItemsusid
+                            + "' and pickerposition='" + position + "'"
+                            + " and " + OMSDatabaseConstants.CONFIGDB_APPID
+                            + " = '" + appId + "'" + "and "
+                            + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
+                            + " <> '1'", null, null, null, null);
+            for (boolean hasItem = pickerCursor.moveToFirst(); hasItem; hasItem = pickerCursor
+                    .moveToNext()) {
+                PickerItems tempPickerItems = new PickerItems();
+                tempPickerItems.pickerdatatablename = pickerCursor
+                        .getString(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_PICKER_DATA_TABLE_NAME));
+                tempPickerItems.pickertype = pickerCursor
+                        .getString(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_PICKER_TYPE));
+                tempPickerItems.pickercontent = pickerCursor
+                        .getString(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_PICKER_CONTENT));
+                tempPickerItems.useWhere = pickerCursor.getInt(pickerCursor
+                        .getColumnIndex(OMSDatabaseConstants.USE_WHERE));
+                tempPickerItems.whereColumn = pickerCursor
+                        .getString(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.WHERE_COLUMN_NAME));
+                tempPickerItems.whereConstant = pickerCursor
+                        .getString(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.WHERE_CONSTANT));
+
+                // Picker Mapping
+                tempPickerItems.pickermapping = pickerCursor
+                        .getInt(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_PICKER_MAPPING));
+
+                // Picker Key
+                tempPickerItems.pickerkey = pickerCursor
+                        .getString(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_PICKER_CONTENT_KEY));
+
+                tempPickerItems.usId = pickerCursor
+                        .getString(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.UNIQUE_ROW_ID));
+
+
+                tempPickerItems.hasdependent = pickerCursor
+                        .getInt(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_HAS_DEPENDENT));
+                tempPickerItems.isdependent = pickerCursor
+                        .getInt(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_IS_DEPENDENT));
+                tempPickerItems.dependentpickerusid = pickerCursor
+                        .getString(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_DEPENDENT_PICKER_USID));
+                tempPickerItems.isMandatory = pickerCursor
+                        .getInt(pickerCursor
+                                .getColumnIndex(OMSDatabaseConstants.PICKER_CONFIG_IS_MANDATORY));
+                pickerData.add(tempPickerItems);
+
+            }
+            pickerCursor.close();
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG,
+                    "Exception occured while fetching picker data  from PickerConfig table of ConfigDB."
+                            + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return pickerData;
+    }
+
 
 }

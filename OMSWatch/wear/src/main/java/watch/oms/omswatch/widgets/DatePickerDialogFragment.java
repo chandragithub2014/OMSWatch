@@ -74,7 +74,7 @@ public class DatePickerDialogFragment extends DialogFragment
     }
 
     private void parseDate(String dateReceived){
-        formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+        formatter = new SimpleDateFormat("dd MMM, yyyy", Locale.getDefault());
 
        try{
            Date date =  formatter.parse(dateReceived);
@@ -194,7 +194,8 @@ private void populateMonthlyHash(){
               /*  SendDataDialogListener activity = (SendDataDialogListener) getActivity();
                 activity.onFinishDialog("monthlyHash.get(numPickerMonth)+\" \"+numPickerDay+\",\"+numPickerYear");*/
                 SendDataDialogListener mHost = (SendDataDialogListener)getTargetFragment();
-                String parsedDate = monthlyHash.get(numPickerMonth)+" "+numPickerDay+","+" "+numPickerYear;
+              //  String parsedDate = monthlyHash.get(numPickerMonth)+" "+numPickerDay+","+" "+numPickerYear;
+                String parsedDate = numPickerDay+" "+monthlyHash.get(numPickerMonth)+","+" "+numPickerYear;
                 mHost.onFinishDialog(parsedDate,dateType,widgetID);
                 dismiss();
             }

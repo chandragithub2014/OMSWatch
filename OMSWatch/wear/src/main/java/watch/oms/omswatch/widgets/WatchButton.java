@@ -32,7 +32,7 @@ public class WatchButton {
             watchButton = new Button(ctx);
             watchButton.setId(id);
             watchButton.setHint(lableName);
-            watchButton.getBackground().setColorFilter(0xFFBBAA00, PorterDuff.Mode.MULTIPLY);
+            watchButton.getBackground().setColorFilter(/*0xFFBBAA00*/0xFFFFFFFF, PorterDuff.Mode.MULTIPLY);
 
             //Set the color of the text displayed inside the button
             watchButton.setTextColor(0xFF0000FF);
