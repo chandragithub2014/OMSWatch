@@ -16,7 +16,7 @@ import watch.oms.omswatch.R;
 public class WearableListItemLayout extends FrameLayout implements WearableListView.OnCenterProximityListener {
 
     private ImageView image;
-    private TextView text,secondaryText;
+    private TextView text,secondaryText,detailText;
 
     public WearableListItemLayout(Context context) {
         super(context);
@@ -24,6 +24,8 @@ public class WearableListItemLayout extends FrameLayout implements WearableListV
         image = (ImageView) findViewById(R.id.image);
         text = (TextView) findViewById(R.id.text);
         secondaryText = (TextView) findViewById(R.id.secText);
+        detailText = (TextView)findViewById(R.id.detail_btn);
+
     }
 
     @Override
@@ -31,6 +33,7 @@ public class WearableListItemLayout extends FrameLayout implements WearableListV
         image.animate().scaleX(1.2f).scaleY(1.2f).alpha(1).setDuration(200);
         text.animate().scaleX(1.2f).scaleY(1.2f).alpha(1).setDuration(200);
         secondaryText.animate().scaleX(1.2f).scaleY(1.2f).alpha(1).setDuration(200);
+        detailText.animate().scaleX(1.2f).scaleY(1.2f).alpha(1).setDuration(200);
     }
 
     @Override
@@ -38,6 +41,7 @@ public class WearableListItemLayout extends FrameLayout implements WearableListV
         image.animate().scaleX(1f).scaleY(1f).alpha(0.6f).setDuration(200);
         text.animate().scaleX(1f).scaleY(1f).alpha(0.6f).setDuration(200);
         secondaryText.animate().scaleX(1f).scaleY(1f).alpha(0.6f).setDuration(200);
+        detailText.animate().scaleX(1f).scaleY(1f).alpha(0.6f).setDuration(200);
     }
 
     public ImageView getImage() {
@@ -50,5 +54,9 @@ public class WearableListItemLayout extends FrameLayout implements WearableListV
 
     public TextView getSecondaryText() {
         return secondaryText;
+    }
+
+    public TextView getDetailText(){
+        return  detailText;
     }
 }

@@ -113,6 +113,7 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
     HashMap<String, String> transColumnValHash = new HashMap<String, String>();
     int savedInsertedId = -1;
     private String multiFormScreenDataTableName = "";
+    private ArrayList<String> transUsidList;
 
     public MultiFormFragment() {
         // Required empty public constructor
@@ -178,6 +179,7 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
         tdbHelper = new OMSTransHelper(activityContext);
         pickerList = new ArrayList<String>();
         multiFormScreenHelper = new MultiFormScreenHelper(activityContext);
+        transUsidList = new ArrayList<String>();
     }
 
     @Override
@@ -207,6 +209,9 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
         if (formDataMap != null && formDataMap.size() > 0) {
             multiFormScreenuniqueId = formDataMap.get(OMSDatabaseConstants.MULTI_FORM_SCREEN_UNIQUE_ID);
             multiFormScreenDataTableName =  formDataMap.get(OMSDatabaseConstants.MULTI_FORM_SCREEN_DATA_TABLE_NAME);
+            if(Integer.parseInt(formDataMap.get(OMSDatabaseConstants.FORM_SCREEN_IS_PREPOPULATED))!=0){
+             isPrepopulated = true;
+            }
         }
 //multiFormScreenuniqueId = multiFormScreenDataCursor .getString(multiFormScreenDataCursor.getColumnIndex(OMSDatabaseConstants.MULTI_FORM_SCREEN_UNIQUE_ID));
         if (multiFormScreenuniqueId != null) {
@@ -225,7 +230,35 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
 
     private void createFormUserInterface(Context context, boolean isSave) {
         Log.d(TAG, "In createFormUserInterface()");
+        Hashtable<String, Object> transHashTable = null;
         String columnContent = "";
+
+        if (isPrepopulated) {
+            try {
+                transHashTable = tdbHelper
+                        .getTransDataForPrepopulatedMultiForm(
+                                multiFormScreenDataTableName,
+                                transUniqueId, "", "");
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (transHashTable != null) {
+            Enumeration<String> keys = transHashTable.keys();
+            if (keys.hasMoreElements()) {
+                transUniqueId = (String) transHashTable
+                        .get(OMSDatabaseConstants.UNIQUE_ROW_ID);
+                if (transUsidList != null) {
+                    transUsidList.clear();
+                    transUsidList.add(transUniqueId);
+                } else {
+                    transUsidList = new ArrayList<String>();
+                    transUsidList.add(transUniqueId);
+                }
+            }
+
+        }
+
 
         int rowCount = formGridItemsHash.size();
         Log.d(TAG, "rowCount::::" + rowCount);
@@ -253,6 +286,30 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                 TextView label = WatchTextView.getInstance().fetchTextView(getActivity(), widgetName, widgetIds[i], null);
                                 //   Log.d(TAG,"I val ..."+i);
                                 formParentLayout.addView(label);
+
+                                        if(isPrepopulated){
+
+                                            if (columnContent != null
+                                                    && columnContent.length() > 0) {
+                                                Object colVal = transHashTable
+                                                        .get(columnContent);
+                                                if (colVal != null) {
+                                                    if(columnContent.equalsIgnoreCase("transactiondate")){
+                                                        /*String columnContent = (String)""+colVal;*/
+                                                        String readableDate =  ReadableDateGenerator.getInstance().getReadableDate(""+columnContent,"yy-MM-dd","dd MMM, yyyy");
+                                                        label.setText(readableDate);// format output
+                                                    }else{
+                                                            label.setText((CharSequence) colVal);
+                                                        }
+                                                    }
+
+                                            } else {
+                                                label.setText(widgetName);
+                                            }
+
+                                        }
+
+
                             }
                         } else if (widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_EDIT_TEXT_TYPE)) {
 
@@ -260,6 +317,20 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                 EditText editText = WatchEditText.getInstance().fetchEditText(getActivity(), widgetName, widgetIds[i], null);
                                 Log.d(TAG, "I val ..." + i);
                                 formParentLayout.addView(editText);
+                                if(isPrepopulated){
+                                    if(columnContent.equalsIgnoreCase("transactiondate")){
+                                        String columnContent_val = (String)""+(CharSequence) transHashTable
+                                                .get(columnContent
+                                                        .trim());
+                                        String readableDate = ReadableDateGenerator.getInstance().getReadableDate(columnContent_val, "yy-MM-dd", "dd MMM, yyyy");
+                                        editText.setText(readableDate);// format output
+                                    }else{
+                                        editText
+                                                .setText((CharSequence) transHashTable
+                                                        .get(columnContent
+                                                                .trim()));
+                                    }
+                                }
                             } else {
 
                                 EditText editTextVal = (EditText) view.findViewById(widgetIds[i]);
@@ -292,6 +363,32 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                         launchDatePicker(widgetId, "label");
                                     }
                                 });
+
+                                if(isPrepopulated){
+                                   if(columnContent!=null){
+                                       String columnVal = (String) transHashTable
+                                               .get(columnContent);
+                                       if (!columnVal.isEmpty()
+                                               && columnVal.length() > 0
+                                               && columnVal != null) {
+                                           String datePickerColumnContent = (String)""+columnVal;
+                                           String readableDate="";
+                                           if(datePickerColumnContent.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")){
+                                               readableDate = ReadableDateGenerator.getInstance().getReadableDate(datePickerColumnContent, "yyyy-MM-dd", "dd MMM, yyyy");
+                                           }else{
+                                               readableDate = ReadableDateGenerator.getInstance().getReadableDate(datePickerColumnContent, "dd MMM, yyyy", "dd MMM, yyyy");
+                                           }
+                                           watchDatePickerLabel
+                                                   .setText(readableDate);
+                                       }else{
+                                           watchDatePickerLabel
+                                                   .setText(widgetName);
+                                       }
+                                   }else{
+                                       watchDatePickerLabel
+                                               .setText(widgetName);
+                                   }
+                                }
                             } else {
                                 TextView dateView = (TextView) view.findViewById(widgetIds[i]);
                                 String val = dateView.getText().toString();
@@ -325,6 +422,28 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                         launchTimePicker(timePickerWidgetId, "label");
                                     }
                                 });
+                                if(isPrepopulated){
+                                    if(columnContent!=null){
+                                        String columnVal = (String) transHashTable
+                                                .get(columnContent);
+                                        String result = ReadableDateGenerator.getInstance().parseTime(columnVal);
+                                        columnVal=result;
+                                        if (!columnVal.isEmpty()
+                                                && columnVal.length() > 0
+                                                && columnVal != null) {
+                                            watchDatePickerLabel
+                                                    .setText(columnContent);
+                                            //timeInString = columnContent;
+                                        } else {
+                                            watchDatePickerLabel
+                                                    .setText(widgetName);
+                                            //timeInString = widgetName;
+                                        }
+                                    }else{
+                                        watchDatePickerLabel
+                                                .setText(widgetName);
+                                    }
+                                }
                             } else {
                                 TextView timeView = (TextView) view.findViewById(widgetIds[i]);
                                 String val = timeView.getText().toString();
@@ -335,7 +454,7 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
 
                         } else if (widgetType
                                 .equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_PICKER_TYPE)) {
-
+                            Spinner choicePicker = null;
                             if (!isSave) {
                                 List<PickerItems> pickerData = new ArrayList<PickerItems>();
                                 Log.d(TAG, "I Val Before" + i);
@@ -365,7 +484,7 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                                         null, null);
                                         if (pickerList != null && pickerList.size() > 0) {
 
-                                            Spinner choicePicker = WatchSpinner.getInstance().fetchSpinnerView(getActivity(), widgetName, widgetIds[i], null);
+                                             choicePicker = WatchSpinner.getInstance().fetchSpinnerView(getActivity(), widgetName, widgetIds[i], null);
 
                                             ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(
                                                     activityContext,
@@ -386,11 +505,40 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                         e.printStackTrace();
                                     }
                                 } else {
-                                    Spinner choicePicker = WatchSpinner.getInstance().fetchSpinnerView(getActivity(), widgetName, widgetIds[i], null);
+                                     choicePicker = WatchSpinner.getInstance().fetchSpinnerView(getActivity(), widgetName, widgetIds[i], null);
                                     Log.d(TAG, "I val ...Spinner else " + i);
                                     formParentLayout.addView(choicePicker);
 
                                 }
+
+                                if(isPrepopulated){
+                                    if(columnContent!=null){
+                                        String spinnerItemText = (String) transHashTable
+                                                .get(columnContent);
+                                        if (pickerList
+                                                .size() > 0) {
+                                            if (spinnerItemText != null) {
+                                                if (pickerData
+                                                        .get(0).pickermapping == 1) {
+                                                    spinnerItemText = tdbHelper
+                                                            .getPickerKeyForValue(
+                                                                    pickerData
+                                                                            .get(0).pickerdatatablename,
+                                                                    pickerData
+                                                                            .get(0).pickerkey,
+                                                                    pickerData
+                                                                            .get(0).pickercontent,
+                                                                    spinnerItemText);
+                                                }
+                                                int pos = pickerList
+                                                        .indexOf(spinnerItemText);
+                                                choicePicker
+                                                        .setSelection(pos);
+                                            }
+                                        }
+                                    }
+                                }
+
                             } else {
                                 Spinner mySpinner = (Spinner) view.findViewById(widgetIds[i]);
                                 if (!TextUtils.isEmpty(mySpinner.getSelectedItem().toString())) {

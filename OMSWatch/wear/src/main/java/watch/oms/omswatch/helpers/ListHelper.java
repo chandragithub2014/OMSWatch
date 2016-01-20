@@ -1207,6 +1207,12 @@
                                             .getColumnIndex(OMSDatabaseConstants.LAUNCH_BL)));
                         }
 
+                        {
+                            listDetailMap.put(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL, Integer.toString(listScreenCursor
+                                    .getInt(listScreenCursor
+                                            .getColumnIndex(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL))));
+
+                        }
 
 
                     }

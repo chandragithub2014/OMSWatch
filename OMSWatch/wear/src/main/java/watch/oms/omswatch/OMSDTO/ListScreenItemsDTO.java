@@ -10,6 +10,7 @@ public class ListScreenItemsDTO {
     private String childNavUsid;
     private int position;
     private int clickedPosition;
+    private String transUsid;
 
     public String getPrimaryText() {
         return primaryText;
@@ -57,5 +58,13 @@ public class ListScreenItemsDTO {
 
     public void setClickedPosition(int clickedPosition) {
         this.clickedPosition = clickedPosition;
+    }
+
+    public String getTransUsid() {
+        return transUsid;
+    }
+
+    public void setTransUsid(String transUsid) {
+        this.transUsid = transUsid;
     }
 }

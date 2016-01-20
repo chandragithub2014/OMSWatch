@@ -46,4 +46,27 @@ public class ReadableDateGenerator {
         }
         return readableDate;
     }
+
+    public String parseTime(String columnContent){
+        String result="";
+        int charCount = 0; //resetting character count
+        for(char ch: columnContent.toCharArray()){
+            if(ch == ':'){
+                charCount++;
+            }
+        }
+        if(charCount==2){
+            if (null != columnContent && columnContent.length() > 0 )
+            {
+                int endIndex = columnContent.lastIndexOf(":");
+                if (endIndex != -1)
+                {
+                    result = columnContent.substring(0, endIndex); // not forgot to put check if(endIndex != -1)
+                }
+            }
+        }else{
+            result=columnContent;
+        }
+        return result;
+    }
 }

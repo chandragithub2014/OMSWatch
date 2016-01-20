@@ -2,6 +2,8 @@
 
 
     import android.app.Activity;
+    import android.app.FragmentManager;
+    import android.content.Context;
     import android.os.Bundle;
     import android.app.Fragment;
     import android.support.v7.widget.Toolbar;
@@ -21,6 +23,7 @@
 
     import watch.oms.omswatch.OMSDTO.ListScreenItemsDTO;
     import watch.oms.omswatch.OMSDTO.NavigationItems;
+    import watch.oms.omswatch.OMSFactory;
     import watch.oms.omswatch.OMSLoadScreenHelper;
     import watch.oms.omswatch.R;
     import watch.oms.omswatch.adapters.OMSListAdapter;
@@ -33,6 +36,7 @@
     import watch.oms.omswatch.helpers.ListHelper;
     import watch.oms.omswatch.helpers.NavigationHelper;
     import watch.oms.omswatch.helpers.OMSTransHelper;
+    import watch.oms.omswatch.interfaces.OMSListDetailListener;
 
     /**
     /**
@@ -40,7 +44,7 @@
      * Use the {@link ListScreenFragment#} factory method to
      * create an instance of this fragment.
      */
-    public class ListScreenFragment extends Fragment {
+    public class ListScreenFragment extends Fragment implements OMSListDetailListener{
         // TODO: Rename parameter arguments, choose names that match
 
         private final String TAG = this.getClass().getSimpleName();
@@ -79,6 +83,10 @@
 
         private String whereColumnName = null;
         private String whereColumnConstant = null;
+
+        private String detailScreenUsid = null;
+        private int  detailScreenOrder = -1;
+        private boolean showDetail = false;
 
         public ListScreenFragment() {
             // Required empty public constructor
@@ -171,6 +179,7 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
 
     } else if (listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HOMOGENEOUS_TYPE)) {
         if (!TextUtils.isEmpty(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME))) {
+
             //Get RetainMap
             Map<String, String> mapRetainClauses = OMSApplication.getInstance().getRetainWhereClause();
             if(mapRetainClauses != null && !mapRetainClauses.isEmpty()){
@@ -183,6 +192,11 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
             }
             //
             prepareDataforHomogeneousList(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME));
+
+          if(Integer.parseInt(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL))!=0){
+                showDetail = true;
+              prepareForDetailChild();
+            }
         }
     }
 }
@@ -268,6 +282,9 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                         if(transMap.get("imageURL")!=null) {
                             temp.setImageURL(transMap.get("imageURL"));
                         }
+                        if(transMap.get("uniqueid")!=null){
+                            temp.setTransUsid(transMap.get("uniqueid"));
+                        }
                     }
                     updatedScreenItems.add(temp);
                 }
@@ -281,7 +298,7 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
 
 
         private void setAdapter(List<ListScreenItemsDTO> heterogeneousData){
-            wearableListView.setAdapter(new OMSListAdapter(getActivity(), heterogeneousData));
+            wearableListView.setAdapter(new OMSListAdapter(getActivity(), heterogeneousData,showDetail,ListScreenFragment.this));
         }
 
         private  List<ListScreenItemsDTO>  fetchListItemsFromDB(){
@@ -413,8 +430,26 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                                 navigationItems.appId);
             }
         }
+
+
+        private void prepareForDetailChild(){
+            NavigationItems navigationItems =  getChildForHomogeneousList(navUsid, screenOrder);
+            if(navigationItems!=null) {
+                if(navigationItems.position == OMSConstants.DETAIL_BUTTON_POSITION){
+                    detailScreenUsid = navigationItems.uniqueId;
+                    detailScreenOrder = navigationItems.screenorder;
+                }
+            }
+            /*for (int i = 0; i < navigationItems.size(); i++) {
+                if (navigationItems.get(i).position == OMSConstants.DETAIL_BUTTON_POSITION) {
+                    detailScreenUsid = navigationItems.get(i).uniqueId;
+                    detailScreenOrder = navigationItems.get(i).screenorder;
+                }
+            }*/
+
+        }
         private void inBackPressed(String navUsid,int appId){
-            NavigationItems navigationItems =  navigationHelper.getParentOnBack(navUsid,appId);
+            NavigationItems navigationItems =  navigationHelper.getParentOnBack(navUsid, appId);
         if(navigationItems!=null) {
                 Log.d("TAG", "Child SCREEN screentype:::" + navigationItems.screentype);
                 Log.d("TAG", "Child SCREEN parent_id:::" + navigationItems.parent_id);
@@ -437,5 +472,54 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
             }
             }
         }
+
+        //Listener to launch detail form screen from list
+        @Override
+        public void receiveDetail(String detailFormtransusid) {
+            //detailFormtransusid ---> Row id  of detail form database table which is transusid
+            if(!TextUtils.isEmpty(detailFormtransusid)){
+                Log.d(TAG,"Detail Form TransUsid::::"+detailFormtransusid);
+                launchDetailForm(detailFormtransusid);
+
+            }
+        }
+
+        private void launchDetailForm(String transusid){
+            Bundle bundle = new Bundle();
+
+            bundle.putString(OMSMessages.TRANS_USID.getValue(),
+                    transusid);
+            bundle.putString(OMSMessages.UNIQUE_ID.getValue(),
+                    detailScreenUsid);
+            bundle.putString(OMSMessages.UI_HEADING.getValue(),
+                    "DetailForm");
+            bundle.putBoolean(
+                    OMSMessages.IS_PREPOPULATED.getValue(),
+                    true);
+            bundle.putBoolean(
+                    OMSMessages.IS_LOADSCREEN.getValue(), true);
+            bundle.putInt(OMSMessages.SCREEN_ORDER.getValue(),
+                    detailScreenOrder);
+            bundle.putInt(OMSMessages.CUSTOM_CONTAINERID
+                    .getValue(),mContainerId);
+            bundle.putInt(
+                    OMSMessages.ACTION_BUTTON_ID.getValue(),
+                    OMSConstants.DETAIL_ACTION_BUTTON_ID);
+             bundle.putInt(OMSMessages.CONFIGAPP_ID.getValue(),
+                    configDBAppId);
+            //	perFormTemplateAction();
+            FragmentManager multiFormFragmentManager = activityContext
+                    .getFragmentManager();
+            Fragment multiFormScreenFragment = OMSFactory
+                    .getInstance(OMSFactory.TemplateType.MultiForm,
+                            detailScreenUsid);
+            multiFormScreenFragment.setArguments(bundle);
+            multiFormFragmentManager
+                    .beginTransaction()
+                    .replace(mContainerId,
+                            multiFormScreenFragment)
+                    .addToBackStack("null").commit();
+        }
+
 
     }
