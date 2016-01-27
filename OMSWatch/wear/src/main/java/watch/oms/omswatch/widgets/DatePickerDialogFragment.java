@@ -50,7 +50,7 @@ public class DatePickerDialogFragment extends DialogFragment
     int  numPickerYear = 1;
     int  numPickerDay = 1;
     int numPickerMonth = 1;
-    TextView set_btn,cancel_btn;
+    Button set_btn,cancel_btn;
     HashMap<Integer,String> monthlyHash;
     String dateType="label";
     int widgetID  = -1;
@@ -180,8 +180,8 @@ private void populateMonthlyHash(){
                 numPickerDay = newVal;
             }
         });
-        set_btn = (TextView)mRootView.findViewById(R.id.set_dialog);
-        cancel_btn = (TextView)mRootView.findViewById(R.id.cancel_dialog);
+        set_btn = (Button)mRootView.findViewById(R.id.set_dialog);
+        cancel_btn = (Button)mRootView.findViewById(R.id.cancel_dialog);
         set_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

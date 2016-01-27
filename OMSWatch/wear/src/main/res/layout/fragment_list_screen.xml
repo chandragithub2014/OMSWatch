@@ -15,7 +15,6 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:background="#FFFFFF"
-        android:padding="5dp"
         app:layout_box="all"
         >
     <android.support.wearable.view.WearableListView
@@ -23,6 +22,7 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:scrollbars="none"
+        android:layout_centerHorizontal="true"
         android:dividerHeight="0dp">
     </android.support.wearable.view.WearableListView>
     </RelativeLayout>

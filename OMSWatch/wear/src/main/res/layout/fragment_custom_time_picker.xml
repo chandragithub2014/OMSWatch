@@ -207,22 +207,25 @@ android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true">
 
-        <TextView
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="10dp"
+            android:textSize="8dp"
             android:text="Cancel"
             android:id="@+id/cancel_dialog"
             android:gravity="center"
             android:layout_marginLeft="20dp"
+            android:tint="@color/white"
             android:layout_alignParentLeft="true"/>
-        <TextView
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="10dp"
+            android:textSize="8dp"
+            android:layout_marginLeft="5dp"
             android:text="Set"
             android:id="@+id/set_dialog"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="15dp"
+            android:tint="@color/white"
             android:layout_alignParentRight="true"/>
     </RelativeLayout>
 </RelativeLayout>

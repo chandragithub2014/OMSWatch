@@ -5,9 +5,11 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.speech.RecognizerIntent;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -114,6 +116,11 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
     int savedInsertedId = -1;
     private String multiFormScreenDataTableName = "";
     private ArrayList<String> transUsidList;
+
+    //VOICE INPUT RELATED CODE
+    private static final int SPEECH_REQUEST_CODE = 0;
+
+    int editTextId = -1;
 
     public MultiFormFragment() {
         // Required empty public constructor
@@ -312,9 +319,11 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
 
                             }
                         } else if (widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_EDIT_TEXT_TYPE)) {
+                            EditText editText = null;
 
                             if (!isSave) {
-                                EditText editText = WatchEditText.getInstance().fetchEditText(getActivity(), widgetName, widgetIds[i], null);
+                                 editText = WatchEditText.getInstance().fetchEditText(getActivity(), widgetName, widgetIds[i], null);
+                                editTextId = widgetIds[i];
                                 Log.d(TAG, "I val ..." + i);
                                 formParentLayout.addView(editText);
                                 if(isPrepopulated){
@@ -340,6 +349,14 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                 }
 
                             }
+
+                            editText.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    displaySpeechRecognizer();
+                                }
+                            });
+
                         } else if (widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_BUTTON_TYPE)) {
 
                             if (!isSave) {
@@ -562,6 +579,32 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                 }
             }
         }
+    }
+
+
+    // Create an intent that can start the Speech Recognizer activity
+    private void displaySpeechRecognizer() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+// Start the activity, the intent will be populated with the speech text
+        startActivityForResult(intent, SPEECH_REQUEST_CODE);
+    }
+
+    // This callback is invoked when the Speech Recognizer returns.
+// This is where you process the intent and extract the speech text from the intent.
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SPEECH_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            List<String> results = data.getStringArrayListExtra(
+                    RecognizerIntent.EXTRA_RESULTS);
+            String spokenText = results.get(0);
+            EditText editTextVal = (EditText) view.findViewById(editTextId);
+            editTextVal.setText(spokenText);
+            // Do something with spokenText
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 

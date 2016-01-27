@@ -13,6 +13,8 @@
        android:orientation="vertical"
        android:id="@+id/formParent"
        android:layout_gravity="center"
+       android:layout_marginLeft="20dp"
+       android:layout_marginRight="20dp"
 
      >
 

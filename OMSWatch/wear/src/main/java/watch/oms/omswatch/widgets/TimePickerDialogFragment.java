@@ -169,8 +169,8 @@ private void populateMonthlyHash(){
                 numPickerMinute = newVal;
             }
         });
-        set_btn = (TextView)mRootView.findViewById(R.id.set_dialog);
-        cancel_btn = (TextView)mRootView.findViewById(R.id.cancel_dialog);
+        set_btn = (Button)mRootView.findViewById(R.id.set_dialog);
+        cancel_btn = (Button)mRootView.findViewById(R.id.cancel_dialog);
         set_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
