@@ -32,7 +32,7 @@ public class WatchSpinner {
             watchSpinner = new Spinner(ctx);
             watchSpinner.setId(id);
            /// watchSpinner.setText(lableName);
-            LinearLayout.LayoutParams params =   LayoutParameters.getInstance().fetchParams();
+            LinearLayout.LayoutParams params = LayoutParameters.getInstance().fetchParams();
             watchSpinner.setLayoutParams(params);
         }catch (Exception e){
             e.printStackTrace();
@@ -42,7 +42,8 @@ public class WatchSpinner {
 
     LinearLayout.LayoutParams fetchParams(){
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        params.setMargins(20,5,10,5);
+        params.setMargins(30,-35,10,0);
+        //left top right bottom
         return params;
     }
 }

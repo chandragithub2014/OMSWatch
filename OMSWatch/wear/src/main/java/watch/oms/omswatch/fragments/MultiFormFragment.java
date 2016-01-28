@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,12 +43,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import watch.oms.omswatch.OMSDTO.NavigationItems;
 import watch.oms.omswatch.OMSDTO.PickerItems;
+import watch.oms.omswatch.OMSLoadScreenHelper;
 import watch.oms.omswatch.R;
+import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
 import watch.oms.omswatch.constants.OMSDefaultValues;
 import watch.oms.omswatch.constants.OMSMessages;
 import watch.oms.omswatch.helpers.MultiFormScreenHelper;
+import watch.oms.omswatch.helpers.NavigationHelper;
 import watch.oms.omswatch.helpers.OMSTransHelper;
 import watch.oms.omswatch.interfaces.SendDataDialogListener;
 import watch.oms.omswatch.utils.CustomToast;
@@ -120,7 +125,12 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
     //VOICE INPUT RELATED CODE
     private static final int SPEECH_REQUEST_CODE = 0;
 
-    int editTextId = -1;
+
+    private int editTextId = -1;
+    ImageView backFromForm;
+    private boolean isBack = true;
+    private NavigationHelper navigationHelper = null;
+    private int mContainerId = OMSDefaultValues.NONE_DEF_CNT.getValue();
 
     public MultiFormFragment() {
         // Required empty public constructor
@@ -164,6 +174,8 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
             configDBAppId = args.getInt(OMSMessages.CONFIGAPP_ID.getValue());
             isFromLoadScreen = args.getBoolean(OMSMessages.IS_LOADSCREEN
                     .getValue());
+            isBack  =  getArguments().getBoolean(OMSMessages.IS_BACK
+                    .getValue());
             /*screenMode = args.getBoolean(OMSMessages.SCREEN_MODE.getValue(),
                     true);
             signature = args.getString(OMSMessages.SIGNATURE.getValue(), null);
@@ -187,6 +199,7 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
         pickerList = new ArrayList<String>();
         multiFormScreenHelper = new MultiFormScreenHelper(activityContext);
         transUsidList = new ArrayList<String>();
+        navigationHelper = new NavigationHelper();
     }
 
     @Override
@@ -200,6 +213,20 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
         saveForm.setVisibility(View.VISIBLE);
         saveForm.setOnClickListener(this);
         formParentLayout = (LinearLayout) view.findViewById(R.id.formParent);
+        RelativeLayout formHeaderLayout = (RelativeLayout)view.findViewById(R.id.form_header);
+        backFromForm = (ImageView)formHeaderLayout.findViewById(R.id.back_form);
+        if(!isBack) {
+            backFromForm.setVisibility(View.VISIBLE);
+        }else{
+            backFromForm.setVisibility(View.INVISIBLE);
+        }
+
+        backFromForm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inBackPressed(navusid, configDBAppId);
+            }
+        });
         if (isFromLoadScreen) {
             try {
                 formDataMap = multiFormScreenHelper
@@ -211,6 +238,13 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
             formDataMap = multiFormScreenHelper
                     .getMultiFormScreenData(navusid, isPrepopulated,
                             configDBAppId);
+        }
+
+        if (container != null) {
+            mContainerId = container.getId();
+        }
+        if (customContainerId != OMSDefaultValues.NONE_DEF_CNT.getValue()) {
+            mContainerId = customContainerId;
         }
 
         if (formDataMap != null && formDataMap.size() > 0) {
@@ -353,9 +387,18 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                             editText.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    displaySpeechRecognizer();
+                                    if(editTextId!=-1){
+                                        OMSApplication.getInstance().setWidgetID(editTextId);
+                                        displaySpeechRecognizer();
+                                    }
                                 }
                             });
+                           /* editText.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    displaySpeechRecognizer();
+                                }
+                            });*/
 
                         } else if (widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_BUTTON_TYPE)) {
 
@@ -600,8 +643,11 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
             List<String> results = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
             String spokenText = results.get(0);
-            EditText editTextVal = (EditText) view.findViewById(editTextId);
-            editTextVal.setText(spokenText);
+            if(OMSApplication.getInstance().getWidgetID()!=-1){
+                EditText editTextVal = (EditText) view.findViewById(OMSApplication.getInstance().getWidgetID());
+                editTextVal.setText(spokenText);
+
+            }
             // Do something with spokenText
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -778,5 +824,31 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
             }
         }
 
+    }
+
+
+    private void inBackPressed(String navUsid,int appId){
+        NavigationItems navigationItems =  navigationHelper.getParentOnBack(navUsid, appId);
+        if(navigationItems!=null) {
+            Log.d("TAG", "Child SCREEN screentype:::" + navigationItems.screentype);
+            Log.d("TAG", "Child SCREEN parent_id:::" + navigationItems.parent_id);
+            Log.d("TAG", "Child SCREEN uniqueId:::" + navigationItems.uniqueId);
+            Log.d("TAG", "Child SCREEN screenorder:::" + navigationItems.screenorder);
+            Log.d("TAG", "Child SCREEN appId:::" + navigationItems.appId);
+
+            if(navigationItems.parent_id == 0){
+                isBack = true;
+            }
+            if(navigationItems!=null){
+                new OMSLoadScreenHelper(activityContext, mContainerId)
+                        .loadTargetScreen(navigationItems.screentype,
+                                navigationItems.parent_id,
+                                navigationItems.uniqueId,
+                                navigationItems.screenorder, isBack  ,
+                                null, null, "",
+                                OMSDefaultValues.NONE_DEF_CNT.getValue(),
+                                navigationItems.appId);
+            }
+        }
     }
 }

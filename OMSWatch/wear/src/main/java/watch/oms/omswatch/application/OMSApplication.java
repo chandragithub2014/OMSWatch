@@ -94,8 +94,10 @@ public class OMSApplication<autoButtonNavHash> extends Application {
 	private String appLaunchTimeUsid="";
 	private String userSessionId="";
 	private String screensessionId="";
-			
-	
+	private int widgetID;
+
+
+
 	public int getRoleID() {
 		return 1;
 	}
@@ -560,10 +562,16 @@ public class OMSApplication<autoButtonNavHash> extends Application {
 	public void setTraceType(String traceType) {
 		this.traceType = traceType;
 	}
-	
-	
-	
-	// This changes are for Oasis Project. # Start
+
+    public int getWidgetID() {
+        return widgetID;
+    }
+
+    public void setWidgetID(int widgetID) {
+        this.widgetID = widgetID;
+    }
+
+    // This changes are for Oasis Project. # Start
 //	private String userKey;
 //	private String oasisProductSearchScope;
 //	

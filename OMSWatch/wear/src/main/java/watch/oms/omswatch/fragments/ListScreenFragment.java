@@ -14,6 +14,7 @@
     import android.view.View;
     import android.view.ViewGroup;
     import android.widget.ImageView;
+    import android.widget.RelativeLayout;
     import android.widget.TextView;
 
     import java.util.ArrayList;
@@ -88,6 +89,8 @@
         private int  detailScreenOrder = -1;
         private boolean showDetail = false;
 
+        ImageView backFromForm;
+
         public ListScreenFragment() {
             // Required empty public constructor
         }
@@ -138,17 +141,9 @@
             ImageView back_img = (ImageView)mToolBar.findViewById(R.id.back);
            TextView saveForm = (TextView)mToolBar.findViewById(R.id.save_form);
             saveForm.setVisibility(View.GONE);
-            if(!isBack) {
-                back_img.setVisibility(View.VISIBLE);
-            }else{
-                back_img.setVisibility(View.INVISIBLE);
-            }
-            back_img.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    inBackPressed(navUsid, configDBAppId);
-                }
-            });
+
+
+
             initializeHelpers();
 
             if (container != null) {
@@ -160,6 +155,20 @@
 
             OMSApplication.getInstance().setAppId(Integer.toString(configDBAppId));
             listView = inflater.inflate(R.layout.fragment_list_screen, container, false);
+            RelativeLayout formHeaderLayout = (RelativeLayout)listView.findViewById(R.id.form_header);
+            backFromForm = (ImageView)formHeaderLayout.findViewById(R.id.back_form);
+
+            if(!isBack) {
+                backFromForm.setVisibility(View.VISIBLE);
+            }else{
+                backFromForm.setVisibility(View.INVISIBLE);
+            }
+            backFromForm.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    inBackPressed(navUsid, configDBAppId);
+                }
+            });
 
             try {
                 Log.d(TAG, "navUsid:::"+navUsid+"Configdbappid::"+configDBAppId);

@@ -24,7 +24,8 @@ public class LayoutParameters {
 
     LinearLayout.LayoutParams fetchParams(){
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        params.setMargins(20,-5,10,-5);
+        params.setMargins(20,5,10,0);
+        //left top right bottom
         return params;
     }
 }

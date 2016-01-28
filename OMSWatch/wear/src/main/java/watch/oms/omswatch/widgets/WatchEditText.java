@@ -34,7 +34,7 @@ public class WatchEditText {
             editText.setId(id);
             editText.setHint(lableName);
             editText.setHintTextColor(Color.GRAY);
-            editText.setTextSize(10);
+          //  editText.setTextSize(10);
             LinearLayout.LayoutParams params =   LayoutParameters.getInstance().fetchParams();
             editText.setLayoutParams(params);
         }catch (Exception e){
