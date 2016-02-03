@@ -34,7 +34,7 @@ public class OMSConstants {
 	public static final String CONFIG_DB_NAME = "10.db";
 	public static final String trans_xml_url = "http://www.twitter.com/statuses/public_timeline.json";
 	public static final String SCHEMA_NAME = "oms";
-	public static final String APP_ID = "44444";
+	public static final String APP_ID = "99999";
 	public static final int CONFIG_APP_ID = 10;	
 	//	Production server url  "http://gtomobilecoe.cognizant.com
 	//  TestServer URL 	 "http://shoponmobile.cognizant.com"
@@ -235,7 +235,7 @@ public class OMSConstants {
 	// Push Notifications
 	public static final boolean isEnableNotifications = false;
 	// 1 for positive AppID, 0 for negative AppID, 2 for -200
-	public static final int LAUNCH_SCREEN_ORDER_CONSTANT =0;
+	public static final int LAUNCH_SCREEN_ORDER_CONSTANT =2;//0;
 	public static final String[] TEMPLATES_LIST = { LOGIN_SCREEN_TYPE,
 		TAB_SCREEN_TYPE, SPRINGBOARD_SCREEN_TYPE, LIST_SCREEN_TYPE,
 		MULTI_FORM_SCREEN_TYPE, TILES_TYPE, CUSTOM_SCREEN_TYPE,

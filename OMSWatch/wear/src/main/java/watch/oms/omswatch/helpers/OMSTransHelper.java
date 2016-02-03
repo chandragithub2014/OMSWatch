@@ -37,8 +37,33 @@ public class OMSTransHelper {
     public String fetchFilterColumnValFromTransDBData(List<String> colsList,String dataTableName,  HashMap<String,String> columnNameMap ,String filterColumn,int position){
         String filterColumnVal="";
         Cursor transCursor = null;
-        String[] colArr = new String[colsList.size()];
-        colArr = colsList.toArray(colArr);
+        /*String[] colArr = new String[colsList.size()];
+        colArr = colsList.toArray(colArr);*/
+
+
+        //
+
+        String[] colArr = null;//new String[colsList.size()];
+
+        List<String> updatedColList = checkForColumnExistence(colsList, dataTableName);
+        if(updatedColList!=null && updatedColList.size()>0){
+            Log.d(TAG,"11111111111111");
+            colArr = new String[updatedColList.size()];
+            colArr = updatedColList.toArray(colArr);
+            colsList = new ArrayList<String>();
+            for(int i=0;i<updatedColList.size();i++){
+                colsList.add(updatedColList.get(i));
+            }
+        }else {
+            Log.d(TAG,"222222222222");
+            colArr = new String[colsList.size()];
+            colArr = colsList.toArray(colArr);
+        }
+
+        //
+
+
+
         try{
             transCursor = TransDatabaseUtil.query(dataTableName,colArr,null,null,null,null,null);
             if(transCursor.moveToPosition(position))
@@ -83,8 +108,22 @@ public class OMSTransHelper {
         columnNameMap.put("usid","uniqueid");
         String selection = null;
         Cursor transCursor = null;
-        String[] colArr = new String[colsList.size()];
-        colArr = colsList.toArray(colArr);
+        String[] colArr = null;//new String[colsList.size()];
+
+        List<String> updatedColList = checkForColumnExistence(colsList, dataTableName);
+        if(updatedColList!=null && updatedColList.size()>0){
+            Log.d(TAG,"11111111111111");
+            colArr = new String[updatedColList.size()];
+            colArr = updatedColList.toArray(colArr);
+            colsList = new ArrayList<String>();
+            for(int i=0;i<updatedColList.size();i++){
+                colsList.add(updatedColList.get(i));
+            }
+        }else {
+            Log.d(TAG,"222222222222");
+            colArr = new String[colsList.size()];
+            colArr = colsList.toArray(colArr);
+        }
         //      HashMap<String,String> transDataHash = new HashMap<String,String>();
         if (whereClauseColumnName != null
                 && whereClauseColumnName.length() > 0) {
@@ -130,10 +169,59 @@ public class OMSTransHelper {
         }catch(Exception e){
             e.printStackTrace();
         }
-        transCursor.close();
+        if(transCursor!=null) {
+            transCursor.close();
+        }
         return transHashList;
     }
 
+    public List<String> checkForColumnExistence(List<String> colsList,String dataTableName){
+        List<String> colList = new ArrayList<String>();
+        List<String> updatedColList = new ArrayList<String>();
+        Cursor transCursor = null;
+        String selection = null;
+
+        if (selection != null) {
+            selection = selection + " AND "
+                    + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
+                    + " <> '1'";
+        } else {
+            selection = OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
+                    + " <> '1'";
+        }
+
+        try{
+            transCursor = TransDatabaseUtil.rawQuery("PRAGMA table_info(" + dataTableName + ")", null);//TransDatabaseUtil.query(dataTableName,null,selection,null,null,null,null);
+            if(transCursor.moveToFirst()){
+                do{
+                   colList.add(transCursor.getString(transCursor
+                           .getColumnIndex(OMSDatabaseConstants.PRAGMA_COLUMN_NAME1)));
+                }while(transCursor.moveToNext());
+               /* for(int i=0;i<colsList.size();i++){
+                    if(transCursor.getColumnIndex(colsList.get(i))!=-1){
+                        colList.add(colsList.get(i));
+                    }
+                }*/
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        transCursor.close();
+if(colList.size()>0) {
+    for (int i = 0; i < colsList.size(); i++) {
+        for (int j = 0; j < colList.size(); j++) {
+           if(colsList.get(i).equalsIgnoreCase(colList.get(j))){
+               updatedColList.add(colList.get(j));
+           }
+        }
+    }
+}
+        return  updatedColList;
+
+
+
+
+    }
     /**
      * fetch picker table data from trans db for given column
      *

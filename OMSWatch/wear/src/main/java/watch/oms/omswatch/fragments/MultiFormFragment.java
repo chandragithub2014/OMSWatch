@@ -48,6 +48,7 @@ import watch.oms.omswatch.OMSDTO.PickerItems;
 import watch.oms.omswatch.OMSLoadScreenHelper;
 import watch.oms.omswatch.R;
 import watch.oms.omswatch.application.OMSApplication;
+import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
 import watch.oms.omswatch.constants.OMSDefaultValues;
 import watch.oms.omswatch.constants.OMSMessages;
@@ -409,7 +410,52 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                             }
                         } else if (widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_DATE_PICKER_TYPE)) {
 
-                            widgetId = widgetIds[i];
+
+                            //Voice Date Picker
+                            EditText editText = null;
+
+                            if (!isSave) {
+                                editText = WatchEditText.getInstance().fetchEditText(getActivity(), widgetName, widgetIds[i], null);
+                                editTextId = widgetIds[i];
+                                Log.d(TAG, "I val ..." + i);
+                                formParentLayout.addView(editText);
+                                if(isPrepopulated){
+                                    if(columnContent.equalsIgnoreCase("transactiondate")){
+                                        String columnContent_val = (String)""+(CharSequence) transHashTable
+                                                .get(columnContent
+                                                        .trim());
+                                        String readableDate = ReadableDateGenerator.getInstance().getReadableDate(columnContent_val, "yy-MM-dd", "dd MMM, yyyy");
+                                        editText.setText(readableDate);// format output
+                                    }else{
+                                        editText
+                                                .setText((CharSequence) transHashTable
+                                                        .get(columnContent
+                                                                .trim()));
+                                    }
+                                }
+                            } else {
+
+                                EditText editTextVal = (EditText) view.findViewById(widgetIds[i]);
+                                String val = editTextVal.getText().toString();
+                                if (!TextUtils.isEmpty(columnContent)) {
+                                    transColumnValHash.put(columnContent, val);
+                                }
+
+                            }
+
+                            editText.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if(editTextId!=-1){
+                                        OMSApplication.getInstance().setWidgetID(editTextId);
+                                        displaySpeechRecognizer();
+                                    }
+                                }
+                            });
+
+                            //End
+
+                        /*    widgetId = widgetIds[i];
                             TextView watchDatePickerLabel = null;
                             if (!isSave) {
                                 watchDatePickerLabel = WatchTextView.getInstance().fetchTextView(getActivity(), widgetName, widgetIds[i], null);
@@ -465,11 +511,51 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                     }
 
                                 }
-                            }
+                            }*/
 
                         } else if (widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_GRID_TIME_PICKER)) {
 
-                            timePickerWidgetId = widgetIds[i];
+                            EditText editText = null;
+
+                            if (!isSave) {
+                                editText = WatchEditText.getInstance().fetchEditText(getActivity(), widgetName, widgetIds[i], null);
+                                editTextId = widgetIds[i];
+                                Log.d(TAG, "I val ..." + i);
+                                formParentLayout.addView(editText);
+                                if(isPrepopulated){
+                                    if(columnContent.equalsIgnoreCase("transactiondate")){
+                                        String columnContent_val = (String)""+(CharSequence) transHashTable
+                                                .get(columnContent
+                                                        .trim());
+                                        String readableDate = ReadableDateGenerator.getInstance().getReadableDate(columnContent_val, "yy-MM-dd", "dd MMM, yyyy");
+                                        editText.setText(readableDate);// format output
+                                    }else{
+                                        editText
+                                                .setText((CharSequence) transHashTable
+                                                        .get(columnContent
+                                                                .trim()));
+                                    }
+                                }
+                            } else {
+
+                                EditText editTextVal = (EditText) view.findViewById(widgetIds[i]);
+                                String val = editTextVal.getText().toString();
+                                if (!TextUtils.isEmpty(columnContent)) {
+                                    transColumnValHash.put(columnContent, val);
+                                }
+
+                            }
+
+                            editText.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if(editTextId!=-1){
+                                        OMSApplication.getInstance().setWidgetID(editTextId);
+                                        displaySpeechRecognizer();
+                                    }
+                                }
+                            });
+                          /*  timePickerWidgetId = widgetIds[i];
                             TextView watchDatePickerLabel = null;
                             if (!isSave) {
                                 watchDatePickerLabel = WatchTextView.getInstance().fetchTextView(getActivity(), widgetName, widgetIds[i], null);
@@ -510,7 +596,7 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                 if (!TextUtils.isEmpty(columnContent)) {
                                     transColumnValHash.put(columnContent, val);
                                 }
-                            }
+                            }*/
 
                         } else if (widgetType
                                 .equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_PICKER_TYPE)) {
@@ -836,7 +922,7 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
             Log.d("TAG", "Child SCREEN screenorder:::" + navigationItems.screenorder);
             Log.d("TAG", "Child SCREEN appId:::" + navigationItems.appId);
 
-            if(navigationItems.parent_id == 0){
+            if(navigationItems.parent_id == OMSConstants.LAUNCH_SCREEN_ORDER_CONSTANT){
                 isBack = true;
             }
             if(navigationItems!=null){

@@ -41,7 +41,10 @@
         android:id="@+id/image"
         android:layout_width="38dp"
         android:layout_height="38dp"
-        android:layout_margin="6dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
         android:background="@drawable/rounded_background"
         android:gravity="center"
         android:alpha="0.6"/>

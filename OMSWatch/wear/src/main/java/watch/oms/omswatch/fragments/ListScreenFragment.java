@@ -202,10 +202,10 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
             //
             prepareDataforHomogeneousList(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME));
 
-          if(Integer.parseInt(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL))!=0){
+        /*  if(Integer.parseInt(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL))!=0){
                 showDetail = true;
               prepareForDetailChild();
-            }
+            }*/
         }
     }
 }
@@ -466,7 +466,7 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                 Log.d("TAG", "Child SCREEN screenorder:::" + navigationItems.screenorder);
                 Log.d("TAG", "Child SCREEN appId:::" + navigationItems.appId);
 
-            if(navigationItems.parent_id == 0){
+            if(navigationItems.parent_id == OMSConstants.LAUNCH_SCREEN_ORDER_CONSTANT){
                 isBack = true;
             }
             if(navigationItems!=null){

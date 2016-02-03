@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import watch.oms.omswatch.OMSDTO.NavigationItems;
 import watch.oms.omswatch.WatchDB.OMSDBManager;
+import watch.oms.omswatch.WebServiceHelpers.MedDataPostAsyncTaskHelper;
 import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.constants.OMSMessages;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements OMSReceiveListene
         View mCustomView = mInflater.inflate(R.layout.toolbar_custom_view, null);
         toolbar.addView(mCustomView);
 
+      //  new MedDataPostAsyncTaskHelper(MainActivity.this, MainActivity.this, "").execute("0");
         context = MainActivity.this;
         OMSDBManager manager = new OMSDBManager(MainActivity.this,
                 MainActivity.this);

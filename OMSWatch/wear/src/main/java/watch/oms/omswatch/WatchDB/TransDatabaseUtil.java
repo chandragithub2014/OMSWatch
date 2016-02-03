@@ -110,7 +110,7 @@ public class TransDatabaseUtil {
 	      return getTransDB().query(distinct, table, columns, selection, selectionArgs, groupBy, having, orderBy, limit);
 	}
 
-	public Cursor rawQuery(String sql, String[] selectionArgs) {
+	public static  Cursor rawQuery(String sql, String[] selectionArgs) {
 	      return getTransDB().rawQuery(sql, selectionArgs);
 	}
 

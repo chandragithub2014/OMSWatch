@@ -92,7 +92,7 @@ public class OMSLoadScreenHelper {
 		// navigation drawer ends here
 
 		// Load List Screen Template
-		if (screenType.equalsIgnoreCase(OMSConstants.LIST_SCREEN_TYPE)) {
+		if (screenType.equalsIgnoreCase(OMSConstants.LIST_SCREEN_TYPE) || screenType.equalsIgnoreCase("WatchList")) {
            /*    NavigationHelper navigationHelper = new NavigationHelper();
 
             // Get SplitView Value from DB

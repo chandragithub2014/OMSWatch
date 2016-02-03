@@ -1206,13 +1206,17 @@
                                     .getString(listScreenCursor
                                             .getColumnIndex(OMSDatabaseConstants.LAUNCH_BL)));
                         }
+                        /*if (listScreenCursor
+                                .getString(listScreenCursor
+                                        .getColumnIndex(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL)) != null) {
 
-                        {
                             listDetailMap.put(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL, Integer.toString(listScreenCursor
                                     .getInt(listScreenCursor
                                             .getColumnIndex(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL))));
 
-                        }
+                        }else{
+                            listDetailMap.put(OMSDatabaseConstants.LIST_SCREEN_SHOW_DETAIL, "0");
+                        }*/
 
 
                     }

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.wearable.view.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#87CEFA"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:padding="15dp"
+    android:id="@+id/box">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        app:layout_box="all">
+
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="18"
+        android:id="@+id/hour"
+         android:gravity="center_horizontal"
+         android:textColor="#fff"
+        android:textStyle="normal"
+        android:textSize="10dp"
+
+        />
+
+
+
+
+
+<!--
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10"
+        android:id="@+id/reminder"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:layout_below="@+id/hour"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="16dp"
+
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\tREMINDERS"
+        android:id="@+id/reminder_label"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:singleLine="true"
+        android:ellipsize="none"
+        android:layout_toRightOf="@+id/reminder"
+        android:layout_below="@+id/hour"
+        android:layout_marginTop="16dp"
+        />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10"
+        android:id="@+id/worklist"
+        android:layout_marginTop="4dp"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:layout_below="@+id/reminder"
+        android:layout_marginLeft="32dp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\tWORKLIST"
+        android:id="@+id/worklist_label"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:textSize="20dp"
+        android:singleLine="true"
+        android:ellipsize="none"
+        android:layout_marginTop="4dp"
+        android:layout_toRightOf="@+id/worklist"
+        android:layout_below="@+id/reminder"
+        />
+-->
+
+    </FrameLayout>
+</android.support.wearable.view.BoxInsetLayout>
