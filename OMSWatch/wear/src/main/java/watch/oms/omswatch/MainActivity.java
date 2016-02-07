@@ -47,6 +47,23 @@ public class MainActivity extends AppCompatActivity implements OMSReceiveListene
         context = MainActivity.this;
         OMSDBManager manager = new OMSDBManager(MainActivity.this,
                 MainActivity.this);
+        try {
+
+            OMSApplication.getInstance().setActivity(MainActivity.this);
+            OMSApplication.getInstance().setAppId(OMSConstants.APP_ID);
+            OMSApplication.getInstance().setAppSchema(OMSConstants.SCHEMA_NAME);
+            OMSApplication.getInstance().setServerUrl(OMSConstants.SERVER_NAME);
+            if(OMSConstants.USE_GENERIC_URL){
+                OMSApplication.getInstance().setConfigURL(OMSApplication.getInstance().getServerURL()+OMSConstants.GENERIC_GET);
+            }else{
+                OMSApplication.getInstance().setConfigURL(
+                        OMSApplication.getInstance().getServerURL()
+                                + OMSConstants.CONFIG_GET
+                                + OMSApplication.getInstance().getAppId());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         manager.load();
 
     }

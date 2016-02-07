@@ -204,7 +204,7 @@ public class OMSConstants {
 	public static final String DEFAULT_FONT_STYLE_NAME = "default1";
 
 	// ByPass Webservice call for ConfigDB
-	public static final boolean BYPASS_WEBSERVICE_CALL_CONFIGDB = true;
+	public static final boolean BYPASS_WEBSERVICE_CALL_CONFIGDB = false;
 
 	// Action Menu items related Constants
 	public static final int SEARCH_BUTTON_ID = -0;

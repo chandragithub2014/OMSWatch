@@ -205,16 +205,16 @@ public class OMSApplication<autoButtonNavHash> extends Application {
 		this.isTablet = isTablet;
 	}
 
-	/*public Activity getActivity() {
+	public Activity getActivity() {
 		return activity;
 	}
 
 	public void setActivity(Activity activity) {
 		this.activity = activity;
-		root = (ViewGroup) activity.findViewById(R.id.rootpanel);
+		/*root = (ViewGroup) activity.findViewById(R.id.rootpanel);
 		detail = (ViewGroup) activity.findViewById(R.id.detailpanel);
-		setTablet(isTabletDevice());
-	}*/
+		setTablet(isTabletDevice());*/
+	}
 	
 	public void setMainActivity(Activity activity) {
 		this.mainActivity = activity;

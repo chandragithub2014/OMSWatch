@@ -39,7 +39,11 @@ import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
 import watch.oms.omswatch.constants.OMSMessages;
+import watch.oms.omswatch.helpers.OMSTransDBGenerator;
 import watch.oms.omswatch.interfaces.OMSReceiveListener;
+import watch.oms.omswatch.parser.OMSConfigDBParser;
+import watch.oms.omswatch.parser.OMSDBParserHelper;
+import watch.oms.omswatch.parser.OMSServerMapperHelper;
 
 public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener {
 
@@ -65,16 +69,16 @@ public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener
 	}
 
 	public void load() {
-
+Log.d(TAG,"DBManager load()");
 		// create config database
 		createConfigDataBase();
 		OMSApplication.getInstance().setAppId(OMSConstants.APP_ID);
-		createWatchTransDataBase();
+		/*createWatchTransDataBase();
         if(isConfigCreated && isTransCreated){
             receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
-        }
+        }*/
 
-	/*	// populate data into config database schema
+		// populate data into config database schema
 		if (!(OMSConstants.BYPASS_WEBSERVICE_CALL_CONFIGDB)) {
 			if (!(OMSApplication.getInstance().isGlobalByPass999())) {
 				if (checkNetworkConnectivity()) {
@@ -87,7 +91,7 @@ public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener
 			}
 		} else {
 			receiveResult(OMSMessages.CONFIG_DATABASE_PARSE_SUCCESS.getValue());
-		}*/
+		}
 	}
 
 	private OMSDBManager() {
@@ -113,6 +117,194 @@ public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener
         isConfigCreated = true;
 		openConfigDBConnection();
 	}
+
+
+
+	public void createTransDB(int appid) {
+		Log.i(TAG, "transDB schema - creation is in progress");
+		OMSDBParserHelper ctdbHelper = new OMSDBParserHelper();
+		String transXmlResponse = ctdbHelper.getTransXML(appid);
+
+
+		if (OMSConstants.BYPASS_WEBSERVICE_CALL_CONFIGDB){
+			createTransDataBase();
+			receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
+		}else{
+			if(!isWatchTransDBExists()){
+				if (!TextUtils.isEmpty(transXmlResponse) && (Integer.parseInt(OMSApplication.getInstance()
+						.getAppId()) != 10)) {
+					Log.i(TAG, "TransXMLResponse:::" + transXmlResponse);
+					OMSTransDBGenerator tbHelper = new OMSTransDBGenerator(localContext);
+					tbHelper.createTransDataBase(transXmlResponse,Integer.parseInt(OMSApplication.getInstance()
+							.getAppId()));
+					Log.i(TAG, "transDB schema is created");
+				}
+			}
+
+            receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
+            openTransDBConnection();
+			// Skipping TransDataBase data filling for all the tables
+			/*if(OMSApplication.getInstance().isEnableTransService()){
+
+				if (!(OMSApplication.getInstance().isGlobalByPass999())) {
+					OMSServerMapperHelper serverMapperHelper = new OMSServerMapperHelper();
+					String transUrl = serverMapperHelper.getTransURL(ALL_TABLE,
+							OMSMessages.GET.getValue());
+
+					if(transUrl.contains("null") || transUrl==null){
+						Toast.makeText(localContext, "Target host must not be null.", Toast.LENGTH_LONG).show();
+						receiveResult(OMSMessages.TRANS_DB_ERROR.getValue());
+					}else{
+						if (checkNetworkConnectivity()) {
+							Log.i(TAG, "transDB schema - data population starting ..");
+							if (Integer.parseInt(OMSApplication.getInstance()
+									.getAppId()) == 10) {
+								double lastmodifiedTime = 0.0f;
+								OMSServerMapperHelper helper = new OMSServerMapperHelper();
+
+								lastmodifiedTime = helper
+										.getLastModifiedTimeStamp(OMSApplication
+												.getInstance().getEditTextHiddenVal());
+								if(OMSConstants.USE_GENERIC_URL) {
+									transUrl= OMSConstants.SERVER_NAME+"/AiM/"+OMSApplication.getInstance()
+											.getEditTextHiddenVal()+"?"+"modifieddate="+lastmodifiedTime;
+									transUrl = OMSConstants.SERVER_NAME+"/AiM/10?"+"modifieddate="+lastmodifiedTime+"&appid="+OMSApplication.getInstance()
+											.getEditTextHiddenVal();
+								}else{
+									transUrl = OMSConstants.SERVER_NAME
+											+ "/AiM/service/config/getConfigByAppId/"
+											+ OMSApplication.getInstance()
+											.getEditTextHiddenVal() + "/" + lastmodifiedTime;
+								}
+							}
+
+
+							new OMSTransDBParser(localContext, OMSDBManager.this).execute(transUrl);
+						}else{
+							Log.d(TAG,
+									"OMSTransDBParser.execute - Network not available.Please try to connect after some time");
+
+							receiveResult(OMSMessages.NETWORK_RESPONSE_ERROR.getValue());
+						}
+					}
+				}else{
+					try {
+						copy999999TransDatabase();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
+				}
+				OMSApplication.getInstance().setEnableTransService(false);
+			}else{*/
+				//		openTransDBConnection();
+			//	receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
+			//}
+
+		//	openTransDBConnection();
+		}
+		/*if (!(OMSConstants.BYPASS_WEBSERVICE_CALL_CONFIGDB) && !(OMSApplication.getInstance().isGlobalByPass999())) {
+			OMSServerMapperHelper serverMapperHelper = new OMSServerMapperHelper();
+			String transUrl = serverMapperHelper.getTransURL(ALL_TABLE,
+					OMSMessages.GET.getValue());
+
+			if(transUrl.contains("null") || transUrl==null){
+				Toast.makeText(localContext, "Target host must not be null.", Toast.LENGTH_LONG).show();
+				receiveResult(OMSMessages.TRANS_DB_ERROR.getValue());
+			}else{
+				Log.i(TAG, "transDB schema - data population starting ..");
+				new OMSTransDBParser(localContext, OMSDBManager.this).execute(transUrl);
+			}
+		}else{
+			receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
+		}*/
+
+		/*OMSServerMapperHelper serverMapperHelper = new OMSServerMapperHelper();
+		String transUrl = serverMapperHelper.getTransURL(ALL_TABLE,
+				OMSMessages.GET.getValue());
+		Log.i(TAG, "transDB schema - data population starting ..");
+
+		if(transUrl.contains("null") && !OMSApplication.getInstance().isGlobalByPass999()){
+			Toast.makeText(localContext, "Target host must not be null.", Toast.LENGTH_LONG).show();
+			receiveResult(OMSMessages.TRANS_DB_ERROR.getValue());
+		}else{
+			new OMSTransDBParser(localContext, OMSDBManager.this).execute(transUrl);
+		}*/
+	}
+
+	//
+    private boolean isLocalTransExist() throws IOException {
+        Log.i(TAG,
+                "method copyConfigDatabase, copying configDB schema from local to device");
+        String transDBName = ((OMSApplication) localContext
+                .getApplicationContext()).getAppId()
+                + OMSMessages.DB_EXT.getValue();
+        try{
+            InputStream inputStream = localContext.getAssets().open(transDBName);
+            if(inputStream!=null) inputStream.close();
+            return true;
+        }catch(FileNotFoundException fnf){
+            return false;
+        }
+    }
+
+	private void createTransDataBase() {
+		Log.i(TAG, "method createTransDataBase");
+		boolean dbExist = isWatchTransDBExists();
+		Log.i(TAG, "is trans DB exists- " + dbExist);
+		if (dbExist) {
+		} else {
+//			this.getReadableDatabase();
+			try {
+				if(isLocalTransExist()){
+					copyWatchTransDatabase();
+				}
+				if (isWatchTransDBExists())
+				{
+					SharedPreferences.Editor editor= sp.edit();
+					openTransDBConnection();
+					Cursor c=TransDatabaseUtil.getTransDB().rawQuery("SELECT name FROM sqlite_master WHERE type = 'table'",null);
+					//c.moveToFirst();
+					while(c.moveToNext()){
+						if(!c.getString(0).equalsIgnoreCase("sqlite_sequence") && !c.getString(0).equalsIgnoreCase("android_metadata"))
+						{
+							Cursor mCursor  = TransDatabaseUtil.getTransDB().rawQuery("pragma table_info('"+c.getString(0)+"')",null);
+//							 mCursor.moveToFirst();
+							ArrayList<String> colums = new ArrayList<String>();
+							while(mCursor.moveToNext()){
+								colums.add(mCursor.getString(mCursor.getColumnIndex("name")));
+							}
+							editor.putStringSet(c.getString(0), new HashSet<String>(colums));
+
+						}
+
+					}
+					editor.commit();
+				}else{
+					OMSDBParserHelper ctdbHelper = new OMSDBParserHelper();
+					String transXmlResponse = ctdbHelper.getTransXML(Integer.parseInt(OMSApplication.getInstance().getAppId()));
+					if (!TextUtils.isEmpty(transXmlResponse) && (Integer.parseInt(OMSApplication.getInstance()
+							.getAppId()) != 10)) {
+						Log.i(TAG, "TransXMLResponse:::" + transXmlResponse);
+						OMSTransDBGenerator tbHelper = new OMSTransDBGenerator(localContext);
+						tbHelper.createTransDataBase(transXmlResponse,Integer.parseInt(OMSApplication.getInstance()
+								.getAppId()));
+						Log.i(TAG, "transDB schema is created");
+						openTransDBConnection();
+					}
+				}
+			} catch (IOException e) {
+				Log.e(TAG, "Error occurred in method createTransDB . Error is:"
+						+ e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		openTransDBConnection();
+		receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
+	}
+
+	//
 
 	private boolean isConfigDBExists() {
 
@@ -207,13 +399,13 @@ public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener
 	}
 
 
-/*
+
 	public void populateConfigDB() {
 		Log.i(TAG, "ConfigDB schema - data population starting ..");
 		double modifiedDate = new OMSDBParserHelper()
-		.getLastModifiedConfigDateFromAppsTable(Integer
-				.parseInt(OMSApplication.getInstance()
-						.getAppId()));
+				.getLastModifiedConfigDateFromAppsTable(Integer
+						.parseInt(OMSApplication.getInstance()
+								.getAppId()));
 		String configURL="";
 		if(OMSConstants.USE_GENERIC_URL) {
 			String appId = OMSApplication.getInstance().getAppId();
@@ -229,6 +421,8 @@ public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener
 		/*	configURL=  OMSApplication.getInstance()
 				.getConfigURL()+"?"+"modifieddate="+modifiedDate+"&"+"appid="+appId;*/
 
+		new OMSConfigDBParser(localContext, OMSDBManager.this).execute(configURL);
+	}
 
 
 	@Override
@@ -247,97 +441,60 @@ public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener
 
 	@Override
 	public void receiveResult(String result) {
-		
-		android.util.Log.d(TAG, "OMS DBManager :: " + result);
-		
-		if(result!=null){
-            if (result.contains(OMSMessages.TRANS_DATABASE_SUCCESS.getValue())) {
-                Log.i(TAG, "TransDataBase  schema - data population finished");
+
+
+        android.util.Log.d(TAG, "OMS DBManager :: "+result);
+        if (result != null){
+            if (result.contains(OMSMessages.POLICY_DATABASE_SUCCESS.getValue())) {
+                Log.i(TAG, "PolicyDataBase  schema - data population finished");
                 if (inReceiveListener != null) {
-					Log.i(TAG, "inReceiveListener!=null");
                     inReceiveListener.receiveResult(result);
                 }
             }
-        }
-	/*	if (result != null){
-			if (result.contains(OMSMessages.POLICY_DATABASE_SUCCESS.getValue())) {
-				Log.i(TAG, "PolicyDataBase  schema - data population finished");
-				if (inReceiveListener != null) {
-					inReceiveListener.receiveResult(result);
-				}
-			}	
-			else if (result.contains(OMSMessages.TRANS_DATABASE_SUCCESS.getValue())) {
-				Log.i(TAG, "transDB schema - data population finished");
-
-*//*				if (inReceiveListener != null) {
-					inReceiveListener.receiveResult(result);
-				}
-				
-*//*				// Commented for AppGuard
-				*//* Clean action queue as when config db is ready *//*
-			*//*	if (!(OMSConstants.BYPASS_WEBSERVICE_CALL_CONFIGDB)) {
-					if (!(OMSApplication.getInstance()
-							.isGlobalByPass999())) {
-						ActionCenterHelper acHelper = new ActionCenterHelper(
-								localContext);
-						acHelper.clearActionQueue();
-						if (checkNetworkConnectivity()) {
-							populatePoliciesDataBase();
-						}else{
-							receiveResult(OMSMessages.POLICY_DATABASE_FAILURE.getValue());
-						}
-					} else {
-						createPolicyDataBase();
-						receiveResult(OMSMessages.POLICY_DATABASE_SUCCESS.getValue());
-					}
-				} else {
-					createPolicyDataBase();
-					receiveResult(OMSMessages.POLICY_DATABASE_SUCCESS.getValue());
-				}*//*
+            else if (result.contains(OMSMessages.TRANS_DATABASE_SUCCESS.getValue())) {
+                Log.i(TAG, "transDB schema - data population finished");
 //added for AppGuard
-				if (inReceiveListener != null) {
-					inReceiveListener.receiveResult(result);
-				}
-			} else if (result.contains(OMSMessages.CONFIG_DATABASE_PARSE_SUCCESS
-					.getValue())) {
-				Log.i(TAG, "ConfigDB schema - data population finished");
+                if (inReceiveListener != null) {
+                    inReceiveListener.receiveResult(result);
+                }
+            } else if (result.contains(OMSMessages.CONFIG_DATABASE_PARSE_SUCCESS
+                    .getValue())) {
+                Log.i(TAG, "ConfigDB schema - data population finished");
 
-				*//*if (inReceiveListener != null) {
-					inReceiveListener.receiveResult(result);
-				}*//*
-				if (!(OMSConstants.BYPASS_WEBSERVICE_CALL_CONFIGDB)) {
-					//if (!(OMSApplication.getInstance()
-					//	.isGlobalByPass999())) {
-					createTransDB(Integer.parseInt(OMSApplication.getInstance().getAppId()));
-					//} else {
-					//createTransDataBase();
-					//receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
-					//}
-				} else {
-					createTransDataBase();
-					//receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());  pradeep
-				}
-			} else if (result.contains(OMSMessages.CONFIG_DB_ERROR.getValue())) {
-				Log.i(TAG, "ConfigDB schema - data population failed");
-				if (inReceiveListener != null) {
-					inReceiveListener.receiveResult(result);
-				}
-			} else if (result.contains(OMSMessages.TRANS_DB_ERROR.getValue())
-					|| result.contains("TransDataBaseFailure")) {
-				Log.i(TAG, "TransDB schema - data population failed");
-				if (inReceiveListener != null) {
-					inReceiveListener.receiveResult(result);
-				}
-			} else{
-				Log.e(TAG, "method receiveResult: result["+result+"] value not matched");
-				if (inReceiveListener != null) {
-					inReceiveListener.receiveResult(result);
-				}
-			}
-		}else{
-			Log.e(TAG, "method receiveResult: Result is null");
-		}*/
-	}
+                if (!(OMSConstants.BYPASS_WEBSERVICE_CALL_CONFIGDB)) {
+                    //if (!(OMSApplication.getInstance()
+                    //	.isGlobalByPass999())) {
+                    createTransDB(Integer.parseInt(OMSApplication.getInstance().getAppId()));
+                    //} else {
+                    //createTransDataBase();
+                    //receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());
+                    //}
+                } else {
+                    createTransDataBase();
+                    //receiveResult(OMSMessages.TRANS_DATABASE_SUCCESS.getValue());  pradeep
+                }
+            } else if (result.contains(OMSMessages.CONFIG_DB_ERROR.getValue())) {
+                Log.i(TAG, "ConfigDB schema - data population failed");
+                if (inReceiveListener != null) {
+                    inReceiveListener.receiveResult(result);
+                }
+            } else if (result.contains(OMSMessages.TRANS_DB_ERROR.getValue())
+                    || result.contains("TransDataBaseFailure")) {
+                Log.i(TAG, "TransDB schema - data population failed");
+                if (inReceiveListener != null) {
+                    inReceiveListener.receiveResult(result);
+                }
+            } else{
+                Log.e(TAG, "method receiveResult: result["+result+"] value not matched");
+                if (inReceiveListener != null) {
+                    inReceiveListener.receiveResult(result);
+                }
+            }
+        }else{
+            Log.e(TAG, "method receiveResult: Result is null");
+        }
+
+    }
 
 	private void openConfigDBConnection() {
 		Log.i(TAG, "Opening Config DB Connection");
