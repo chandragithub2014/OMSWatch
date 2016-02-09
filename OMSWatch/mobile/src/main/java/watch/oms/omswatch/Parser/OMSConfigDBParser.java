@@ -12,7 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License. 
  */
-package watch.oms.omswatch.parser;
+package watch.oms.omswatch.Parser;
+
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
+import android.util.JsonReader;
+import android.util.Log;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -36,33 +57,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.json.JSONException;
-import org.json.JSONObject;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
-import android.util.JsonReader;
-import android.util.Log;
-import android.widget.Toast;
-
-import watch.oms.omswatch.R;
-import watch.oms.omswatch.WatchDB.OMSDBManager;
 import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
 import watch.oms.omswatch.constants.OMSDefaultValues;
 import watch.oms.omswatch.constants.OMSMessages;
 import watch.oms.omswatch.interfaces.OMSReceiveListener;
-import watch.oms.omswatch.utils.CustomToast;
+import watch.oms.omswatch.utils.OMSUtils;
 
 
 /**
@@ -77,7 +78,7 @@ import watch.oms.omswatch.utils.CustomToast;
 public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 	private final String TAG = this.getClass().getSimpleName();
 	private Context appContext = null;
-	private OMSDBParserHelper configDBParserHelper = null;
+//	private OMSDBParserHelper configDBParserHelper = null;
 	private OMSReceiveListener rListener = null;
 	private ProgressDialog pDialog = null;
 	//private NetworkUsageAnalyzer analyzer = null;
@@ -88,7 +89,7 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 	public OMSConfigDBParser(Context ctx, OMSReceiveListener receiveListener) {
 		Log.d(TAG, "Config DB Start:::" + System.currentTimeMillis());
 		appContext = ctx;
-		configDBParserHelper = new OMSDBParserHelper();
+	//	configDBParserHelper = new OMSDBParserHelper();
 		Random myRandom = new Random();
 		connectionID = myRandom.nextInt(Integer.MAX_VALUE);
 		//analyzer = NetworkUsageAnalyzer.getInstance(appContext);
@@ -102,12 +103,10 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 			pDialog.show();
 		}
 
-		// Register the local broadcast receiver
-		IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
-		MessageReceiver messageReceiver = new MessageReceiver();
-		LocalBroadcastManager.getInstance(appContext).registerReceiver(messageReceiver, messageFilter);
+
 	}
-	
+
+
 
 	@Override
 	protected String doInBackground(String... args) {
@@ -120,7 +119,7 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 		InputStream inStream = null;
     
 		//Added for HTTPURLConnectivity	
-		if(!OMSDBManager.checkNetworkConnectivity()){
+		if(!OMSUtils.getInstance().checkNetworkConnectivity(appContext)){
 			configResponse = OMSMessages.NETWORK_RESPONSE_ERROR.getValue();
 			Log.d(TAG,
 					" Network not available.Please try to connect after some time");
@@ -132,10 +131,10 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 		/*configResponse = OMSMessages.CONFIG_DATABASE_PARSE_SUCCESS
 				.getValue();*/
 		
-		if(Integer.parseInt(OMSConstants.APP_ID) == -200 ){
+		/*if(Integer.parseInt(OMSConstants.APP_ID) == -200 ){
 			configResponse = enableOnceInADayWebServiceCall(serviceUrl);
 		}
-		else {
+		else */{
 		configResponse = 	fetchURLConnectionConfigResponse(serviceUrl);
 		}
 	/*	httpclient = AppSecurityAndPerformance.getInstance()
@@ -280,7 +279,7 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 
 	@Override
 	protected void onPostExecute(String result) {
-		Log.d(TAG, "Config DB End:::"+System.currentTimeMillis());
+		Log.d(TAG, "Config DB End:::" + System.currentTimeMillis());
 		if(errToast!=null) Toast.makeText(appContext, errToast, Toast.LENGTH_SHORT).show();
 		
 		if (rListener != null) {
@@ -332,10 +331,10 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 
 	/**
 	 * Parses Service response and stores into respective DB table.
-	 * 
-	 * @param pStringReader
+	 *
+	 * @param
 	 */
-	private void readJsonStream(Reader pStringReader) {
+	/*private void readJsonStream(Reader pStringReader) {
 		double latestModifiedTimeStamp = 0.0f;
 		JsonReader reader = null;
 		List<ContentValues> rows = null;
@@ -358,9 +357,9 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 
 					latestModifiedTimeStamp = reader.nextDouble();
 					
-					/*servermapperhelper.updateModifiedTimeStampForAppsTable(
-							 latestModifiedTimeStamp);*/
-					/*if (Integer.parseInt(OMSApplication
+					*//*servermapperhelper.updateModifiedTimeStampForAppsTable(
+							 latestModifiedTimeStamp);*//*
+					*//*if (Integer.parseInt(OMSApplication
 							.getInstance().getAppId()) == 10) {
 						servermapperhelper
 								.updateModifiedTimeStampForVisitedDateMapper(
@@ -368,7 +367,7 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 												.getInstance()
 												.getEditTextHiddenVal(),
 										latestModifiedTimeStamp);
-					}*/
+					}*//*
 					continue;
 				}
 				if (tableName.equals(OMSConstants.NULL_STRING)) {
@@ -425,7 +424,7 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 
 		}
 
-	}
+	}*/
 
 	private List<ContentValues> readAllRowDataForTable(JsonReader reader,
 			String pTableName) throws IOException {
@@ -532,8 +531,8 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 			configDBParserHelper.insertOrUpdateConfigDBBulk(tableName,
 					contentValuesList);*/
 			
-			configDBParserHelper.insertOrUpdateConfigDBBulk(tableName,
-					contentValuesSet);
+			/*configDBParserHelper.insertOrUpdateConfigDBBulk(tableName,
+					contentValuesSet);*/
 			this.contentValuesSet.clear();
 			this.contentValuesSet = null;
 		/*	contentValuesList.clear();
@@ -664,9 +663,10 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 						inputStream = new BufferedInputStream(urlConnection.getInputStream());
 						 response = convertStreamToString(inputStream);
 						 Log.d(TAG, "ConfigResponse for HTTPURLConnection:::"+response);
-						// Create a Reader from String
+                        OMSApplication.getInstance().setConfigDataAPIResponse(response);
+						/*// Create a Reader from String
 							Reader stringReader = new StringReader(response);
-							readJsonStream(stringReader);
+							readJsonStream(stringReader);*/
 							// AppMonitor
 						/*	analyzer.receivedConnectionResponse(connectionID,
 									urlConnection.getContentLength(),
@@ -688,7 +688,7 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 	                     if (response != null) {
 							
 							errToast = urlConnection.getResponseMessage();
-							
+							OMSApplication.getInstance().setConfigDataAPIResponse("Error"+"$"+errToast);
 							return configResponse;
 							
 						} else {
@@ -700,6 +700,7 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 										OMSMessages.ERROR_DESCRIPTION.getValue(),
 										urlConnection.getResponseMessage());
 								response = jsonObject.toString();
+                                OMSApplication.getInstance().setConfigDataAPIResponse("Error"+"$"+response);
 							} catch (JSONException e) {
 								Log.e(TAG,
 										"JSONException occurred when is ConfigDBParse Failed."
@@ -746,7 +747,7 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 	}
 
 	
-	private String enableOnceInADayWebServiceCall(String serviceUrl){
+	/*private String enableOnceInADayWebServiceCall(String serviceUrl){
 		String configResponse = ""; 	  
 		String dateFormat="";
 		SharedPreferences sharedPreferences = PreferenceManager
@@ -794,31 +795,6 @@ public class OMSConfigDBParser extends AsyncTask<String, Void, String> {
 		      
 		}
 		return configResponse;
-	}
+	}*/
 
-
-
-    public class MessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            //  String message = intent.getStringExtra("message");
-            //Log.v("myTag", "Main activity received message: " + message);
-
-            try {
-                //
-                if (intent.hasExtra("result")) {
-                    String result_data = intent.getStringExtra("result");
-                    if (result_data.equalsIgnoreCase("config")) {
-                        //Log.d("TAG", "revertpatient Response::::" + MobileApplication.getInstance().getPatientRevertResponse());
-                         //new CustomToast(getActivity(),getActivity()).displayToast("Received ConfigDB");
-
-
-                    }
-
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-    }
 }

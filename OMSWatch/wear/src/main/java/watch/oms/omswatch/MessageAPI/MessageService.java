@@ -3,7 +3,6 @@ package watch.oms.omswatch.MessageAPI;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
@@ -46,13 +45,15 @@ public class MessageService implements  GoogleApiClient.ConnectionCallbacks,
                     for(Node node : nodes.getNodes()) {
                         MessageApi.SendMessageResult result=null;
                         if(type.equalsIgnoreCase("config")){
-                            Log.d("TAG","Send message when config");
-                            result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("config"+"$"+ OMSApplication.getInstance().getConfigDataAPIResponse()).getBytes()).await();
-                        }else if(type.equalsIgnoreCase("transget")){
-                            Log.d("TAG","Send message when transget");
-                            result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("transget"+"$"+ OMSApplication.getInstance().getTransDataAPIResponse()).getBytes()).await();
+                            result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("config"+"$"+ OMSApplication.getInstance().getConfigDataAPIURL()).getBytes()).await();
+                        } if(type.equalsIgnoreCase("transget")){
+                            result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("transget"+"$"+ OMSApplication.getInstance().getTransDataAPIURL()).getBytes()).await();
                         }
-                        /*else if(type.equalsIgnoreCase("reminderlist")){
+
+                   /*     if(type.equalsIgnoreCase("worklist")){
+                            Log.d("TAG","Send message when WorkList");
+                            result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("worklist"+"$"+MobileApplication.getInstance().getPatientList()).getBytes()).await();
+                        }else if(type.equalsIgnoreCase("reminderlist")){
                             Log.d("TAG","Send message when reminderlist");
                             result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("reminderlist"+"$"+MobileApplication.getInstance().getReminderList()).getBytes()).await();
                         }else if(type.equalsIgnoreCase("myaccount")){
@@ -136,12 +137,7 @@ public class MessageService implements  GoogleApiClient.ConnectionCallbacks,
 
     }
 
-    public void
-
-
-
-
-    startMessageService(Context ctx,String type){
+    public void startMessageService(Context ctx,String type){
         this.ctx=ctx;
         this.type=type;
         Log.d("TAG","Message Type:::"+type);

@@ -35,6 +35,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 
+import watch.oms.omswatch.MainActivity;
+import watch.oms.omswatch.MessageAPI.MessageService;
 import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
@@ -44,6 +46,7 @@ import watch.oms.omswatch.interfaces.OMSReceiveListener;
 import watch.oms.omswatch.parser.OMSConfigDBParser;
 import watch.oms.omswatch.parser.OMSDBParserHelper;
 import watch.oms.omswatch.parser.OMSServerMapperHelper;
+import watch.oms.omswatch.parser.OMSWatchConfigDBParser;
 
 public class OMSDBManager extends SQLiteOpenHelper implements OMSReceiveListener {
 
@@ -420,8 +423,10 @@ Log.d(TAG,"DBManager load()");
 		//		String appId = OMSApplication.getInstance().getAppId();
 		/*	configURL=  OMSApplication.getInstance()
 				.getConfigURL()+"?"+"modifieddate="+modifiedDate+"&"+"appid="+appId;*/
+        OMSApplication.getInstance().setConfigDataAPIURL(configURL);
 
-		new OMSConfigDBParser(localContext, OMSDBManager.this).execute(configURL);
+	//	new OMSConfigDBParser(localContext, OMSDBManager.this).execute(configURL);
+        new OMSWatchConfigDBParser(localContext,OMSDBManager.this).callMessageService(configURL);
 	}
 
 
@@ -554,29 +559,29 @@ Log.d(TAG,"DBManager load()");
 
 
 
-	/*public static SQLiteDatabase getSpecificDB(String schemaName) {
-		// If the request schema name is same as current active, the database is
-		// already open.
-		if (currectActiveSchema.equals(schemaName) && specificDB != null  && specificDB.isOpen()) {
-			return specificDB;
-		} else {
-			Log.i(TAG, "Specific DB - New connection for " + schemaName);
-			// Close the old schema, if any
-			closeSpecificSchemaConnection();
+	public static SQLiteDatabase getSpecificDB(String schemaName) {
+        // If the request schema name is same as current active, the database is
+        // already open.
+        if (currectActiveSchema.equals(schemaName) && specificDB != null && specificDB.isOpen()) {
+            return specificDB;
+        } else {
+            Log.i(TAG, "Specific DB - New connection for " + schemaName);
+            // Close the old schema, if any
+            closeSpecificSchemaConnection();
 
-			// Open new Schema
-			String specificSchemaName = schemaName + OMSMessages.DB_EXT.getValue();
-			specificDB = SQLiteDatabase.openDatabase(localContext
-					.getDatabasePath(specificSchemaName).toString(), null,
-					SQLiteDatabase.OPEN_READWRITE);
+            // Open new Schema
+            String specificSchemaName = schemaName + OMSMessages.DB_EXT.getValue();
+            specificDB = SQLiteDatabase.openDatabase(localContext
+                            .getDatabasePath(specificSchemaName).toString(), null,
+                    SQLiteDatabase.OPEN_READWRITE);
 
-			// Set New schema as current active
-			currectActiveSchema = schemaName;
+            // Set New schema as current active
+            currectActiveSchema = schemaName;
 
-			return specificDB;
-		}*/
+            return specificDB;
+        }
 
-
+    }
 
 	public static void closeDBConnections() {
 		closeConfigDBConnection();

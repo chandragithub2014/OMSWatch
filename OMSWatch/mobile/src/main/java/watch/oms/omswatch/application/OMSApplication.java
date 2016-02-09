@@ -14,11 +14,6 @@
  */
 package watch.oms.omswatch.application;
 
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -27,13 +22,14 @@ import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 
-import watch.oms.omswatch.R;
-import watch.oms.omswatch.WatchDB.OMSDBManager;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+
+
 
 
 public class OMSApplication<autoButtonNavHash> extends Application {
@@ -97,7 +93,7 @@ public class OMSApplication<autoButtonNavHash> extends Application {
 	private int widgetID;
     private String configDataAPIURL;
     private String configDataAPIResponse;
-	private String transDataAPIURL;
+    private String transDataAPIURL;
 	private String transDataAPIResponse;
 
 	public int getRoleID() {
@@ -304,7 +300,7 @@ public class OMSApplication<autoButtonNavHash> extends Application {
 
 	@Override
 	public void onTerminate() {
-		OMSDBManager.closeDBConnections();
+		//OMSDBManager.closeDBConnections();
 		super.onTerminate();
 	}
 
@@ -607,6 +603,7 @@ public class OMSApplication<autoButtonNavHash> extends Application {
     public void setConfigDataAPIResponse(String configDataAPIResponse) {
         this.configDataAPIResponse = configDataAPIResponse;
     }
+
 	public String getTransDataAPIURL() {
 		return transDataAPIURL;
 	}

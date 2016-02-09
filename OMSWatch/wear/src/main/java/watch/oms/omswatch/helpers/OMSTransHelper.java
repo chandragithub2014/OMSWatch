@@ -563,4 +563,40 @@ if(colList.size()>0) {
         }
         return pickerKey;
     }
+
+
+    /**
+     * update status column of trans database table when data is posted to
+     * server through web service e.g. Status: TRIED - When webservice is failed
+     * , COMPLETED - When data posted successfully
+     *
+     * @param tableName
+     * @param contentValues
+     * @param uniqueID
+     * @return Integer
+     */
+    public Integer updateTransDataStatus(String tableName,
+                                         ContentValues contentValues, String uniqueID) {
+        long updateRow = OMSDefaultValues.NONE_DEF_CNT.getValue();
+        Cursor currentActionCursor = null;
+        try {
+            currentActionCursor = TransDatabaseUtil.query(tableName,
+                    null, OMSDatabaseConstants.UNIQUE_ROW_ID + "=" + uniqueID,
+                    null, null, null, null);
+            if (currentActionCursor.moveToFirst()) {
+                updateRow = TransDatabaseUtil.update(tableName,
+                        contentValues,
+                        OMSDatabaseConstants.UNIQUE_ROW_ID + "= ? ",
+                        new String[] { uniqueID });
+            }
+            currentActionCursor.close();
+        } catch (SQLException e) {
+            Log.e(TAG,
+                    "Error occurred in method updateTransDataStatus for input parameter tableName["
+                            + tableName + "], uniqueID[" + uniqueID
+                            + "]. Error is:" + e.getMessage());
+        }
+        return (int) updateRow;
+    }
+
 }

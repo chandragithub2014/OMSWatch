@@ -11,6 +11,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import watch.oms.omswatch.MainActivity;
+import watch.oms.omswatch.Parser.OMSConfigDBParser;
+import watch.oms.omswatch.Parser.TransDBParser;
+import watch.oms.omswatch.application.OMSApplication;
+import watch.oms.omswatch.constants.OMSMessages;
+import watch.oms.omswatch.interfaces.OMSReceiveListener;
 
 /**
  * Created by 245742 on 9/28/2015.
@@ -22,13 +27,26 @@ public class ListenerService extends WearableListenerService  implements OMSRece
         Log.i("test", "onMessageReceived()");
        if(messageEvent.getPath().equals("/message_path")) {
             final String message = new String(messageEvent.getData());
-           webServiceMessage = message;
+          //   webServiceMessage = message;
             Log.d("TAG", "Received url:::" + message);
-            MobileApplication.getInstance().setMessage(message);
-          if(message.equalsIgnoreCase("companion")) {
+
+           if(message.contains("config")){
+            String configURL  = message.substring(message.lastIndexOf("$") + 1);
+               Log.d("TAG","Config URL::::"+configURL);
+               webServiceMessage = configURL;
+               OMSApplication.getInstance().setConfigDataAPIURL(configURL);
+               makeWebServiceCalls("config");
+           }else if(message.contains("transget")){
+               String transURL  = message.substring(message.lastIndexOf("$") + 1);
+               Log.d("TAG","transURL::::"+transURL);
+               webServiceMessage = transURL;
+               OMSApplication.getInstance().setTransDataAPIURL(transURL);
+           }
+
+           /* else  if(message.equalsIgnoreCase("companion")) {
                // Bitmap bitmap  = getBitmapFromURL(message);
                Intent i = new Intent(this, MainActivity.class);
-              i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+               i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                startActivity(i);
           } else  if(message.contains("bulk")){
               String bulkList = message.substring(message.lastIndexOf("$") + 1);
@@ -36,7 +54,7 @@ public class ListenerService extends WearableListenerService  implements OMSRece
               Intent i = new Intent(this, MainActivity.class);
 
               i.putExtra("BULK", "bulk");
-              i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+               i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
               startActivity(i);
               MobileApplication.getInstance().setBulkUpdatedList(bulkList);
           } else  if(message.contains("accountUpdate")){
@@ -77,7 +95,7 @@ public class ListenerService extends WearableListenerService  implements OMSRece
               startActivity(i);
           }else if(message.contains("notes")){
               String notes_json =  message.substring(message.lastIndexOf("$") + 1);
-              MobileApplication.getInstance().setPatientNotes(notes_json);
+               MobileApplication.getInstance().setPatientNotes(notes_json);
               Log.d("TAG","Patient Notes request JSON::::"+notes_json);
               Intent i = new Intent(this, MainActivity.class);
               i.putExtra("NOTES_PATIENT", "notes");
@@ -95,9 +113,9 @@ public class ListenerService extends WearableListenerService  implements OMSRece
           }
            else if (message.contains("reminderCount")){
               makeWebServiceCalls();
-          }
+          }*/
 
-        }else {
+       }else {
            super.onMessageReceived(messageEvent);
         }
     }
@@ -108,7 +126,7 @@ public class ListenerService extends WearableListenerService  implements OMSRece
         super.onDataChanged(dataEvents);
     }
 */
-    private void makeWebServiceCalls(){
+    /*private void makeWebServiceCalls(){
         if(webServiceMessage.equalsIgnoreCase("reminderCount")){
             if(MedDataConstants.USE_TEST_SERVICE){
                 new MedDataPostAsyncTaskHelper(ListenerService.this, ListenerService.this, "reminderCount").execute("https://test-patientlists.meddata.com/PatientDetailsService.svc/GetReminders");
@@ -116,6 +134,14 @@ public class ListenerService extends WearableListenerService  implements OMSRece
                 new MedDataPostAsyncTaskHelper(ListenerService.this, ListenerService.this, "reminderCount").execute("https://dev-patientlists.meddata.com/PatientDetailsService.svc/GetReminders");
             }
         }
+    }*/
+
+    private void makeWebServiceCalls(String type){
+       if(type.equalsIgnoreCase("config")){
+           new OMSConfigDBParser(ListenerService.this, ListenerService.this).execute(OMSApplication.getInstance().getConfigDataAPIURL());
+       } else if(type.equalsIgnoreCase("transget")){
+          new TransDBParser(ListenerService.this,ListenerService.this).execute(OMSApplication.getInstance().getTransDataAPIURL());
+       }
     }
     @Override
     public void onCreate() {
@@ -127,37 +153,29 @@ public class ListenerService extends WearableListenerService  implements OMSRece
     public void receiveResult(String result) {
         Log.d("TAG","Receive Result:::"+result);
         String next = "";
-        if(result.equalsIgnoreCase("reminderCount")) {
+        if(result.contains(OMSMessages.CONFIG_DATABASE_PARSE_SUCCESS
+                .getValue())) {
             next = "worklistCount";
-            String reminderResponse = MobileApplication.getInstance().getReminderList();
+
             try {
-                JSONArray jsonArray1 = new JSONArray(reminderResponse);
-                MobileApplication.getInstance().setReminderCount(jsonArray1.length());
-                MessageService.getInstance().startMessageService(getApplicationContext(), "reminderCount");
+               /* JSONArray jsonArray1 = new JSONArray(reminderResponse);
+                MobileApplication.getInstance().setReminderCount(jsonArray1.length());*/
+                MessageService.getInstance().startMessageService(getApplicationContext(), "config");
             }
-            catch (JSONException e){
+            catch (Exception e){
                 e.printStackTrace();
             }
 
+        }else if(result.contains(OMSMessages.NETWORK_RESPONSE_ERROR.getValue())){
+            MessageService.getInstance().startMessageService(getApplicationContext(), "config");
+
+        }else if(result.contains(OMSMessages.CONFIG_DB_ERROR.getValue())){
+            MessageService.getInstance().startMessageService(getApplicationContext(), "config");
+        } else if(result.equalsIgnoreCase("transgetfailure")){
+            MessageService.getInstance().startMessageService(getApplicationContext(), "transget");
+        }else if(result.equalsIgnoreCase("transgetsuccess")){
+            MessageService.getInstance().startMessageService(getApplicationContext(), "transget");
         }
-        if(result.equalsIgnoreCase("worklistCount")){
-            next="";
-            String workListResponse = MobileApplication.getInstance().getPatientList();
-            try {
-                JSONArray jsonArray1 = new JSONArray(workListResponse);
-                MobileApplication.getInstance().setWorkListCount(jsonArray1.length());
-                MessageService.getInstance().startMessageService(getApplicationContext(), "worklistCount");
-            }
-            catch (JSONException e){
-                e.printStackTrace();
-            }
-        }
-        if(next.equalsIgnoreCase("worklistCount")) {
-            if (MedDataConstants.USE_TEST_SERVICE) {
-                new MedDataPostAsyncTaskHelper(ListenerService.this, ListenerService.this, "worklistCount").execute("https://test-patientlists.meddata.com/PatientDetailsService.svc/GetReminders");
-            } else {
-                new MedDataPostAsyncTaskHelper(ListenerService.this, ListenerService.this, "worklistCount").execute("https://dev-patientlists.meddata.com/PatientDetailsService.svc/GetReminders");
-            }
-        }
+
     }
 }
