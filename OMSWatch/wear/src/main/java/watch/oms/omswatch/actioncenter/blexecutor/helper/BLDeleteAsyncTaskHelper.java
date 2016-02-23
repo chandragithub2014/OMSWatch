@@ -61,9 +61,9 @@ public class BLDeleteAsyncTaskHelper extends AsyncTask<String, Void, String> {
 		context = FragmentContext;
 		rListener = receiveListener;
 		this.transUsidList = transUsidList;
-		pDialog = new ProgressDialog(context);
+/*		pDialog = new ProgressDialog(context);
 		pDialog.setMessage(context.getResources().getString(R.string.bl_delete));
-		pDialog.show();
+		pDialog.show();*/
 
 	}
 
@@ -192,8 +192,8 @@ public class BLDeleteAsyncTaskHelper extends AsyncTask<String, Void, String> {
 				rListener.receiveResult(OMSMessages.BL_FAILURE.getValue());
 			}
 		}
-		if(pDialog.isShowing())
-		pDialog.dismiss();
+		/*if(pDialog.isShowing())
+		pDialog.dismiss();*/
 		Log.d("TAG", "Result in BLDelete ActionCenterAsyncTaskHelper:::"
 				+ result);
 		super.onPostExecute(result);

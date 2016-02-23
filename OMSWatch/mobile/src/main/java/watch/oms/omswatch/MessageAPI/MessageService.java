@@ -1,15 +1,28 @@
 package watch.oms.omswatch.MessageAPI;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.wearable.Asset;
+import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import watch.oms.omswatch.application.OMSApplication;
 
@@ -51,6 +64,17 @@ public class MessageService implements  GoogleApiClient.ConnectionCallbacks,
                         }else if(type.equalsIgnoreCase("transget")){
                             Log.d("TAG","Send message when transget");
                             result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("transget"+"$"+ OMSApplication.getInstance().getTransDataAPIResponse()).getBytes()).await();
+                        }else if(type.equalsIgnoreCase("transpost")){
+                            Log.d("TAG","Send message when transpost");
+                            result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("transpost"+"$"+ OMSApplication.getInstance().getTransPostDataAPIResponse()).getBytes()).await();
+                        }else if(type.equalsIgnoreCase("imageurl")){
+                            Bitmap bitmap = getBitmapFromURL(OMSApplication.getInstance().getDataAPIImageURL());
+                            Asset asset = createAssetFromBitmap(bitmap);
+                            PutDataMapRequest dataMap = PutDataMapRequest.create("/image");
+                            dataMap.getDataMap().putAsset("profileImage", asset);
+                            PutDataRequest request = dataMap.asPutDataRequest();
+                            PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi
+                                    .putDataItem(mGoogleApiClient, request);
                         }
                         /*else if(type.equalsIgnoreCase("reminderlist")){
                             Log.d("TAG","Send message when reminderlist");
@@ -136,12 +160,7 @@ public class MessageService implements  GoogleApiClient.ConnectionCallbacks,
 
     }
 
-    public void
-
-
-
-
-    startMessageService(Context ctx,String type){
+    public void startMessageService(Context ctx,String type){
         this.ctx=ctx;
         this.type=type;
         Log.d("TAG","Message Type:::"+type);
@@ -158,5 +177,29 @@ public class MessageService implements  GoogleApiClient.ConnectionCallbacks,
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
+    }
+
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            Log.d("TAG","BitMap URL:::::"+src);
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+            // Log exception
+            //return null;
+        }
+    }
+
+    private static Asset createAssetFromBitmap(Bitmap bitmap) {
+        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
+        return Asset.createFromBytes(byteStream.toByteArray());
     }
 }

@@ -69,10 +69,10 @@ public class BLOneToManyAsyncTaskHelper extends AsyncTask<String, Void, String> 
 		rListener = receiveListener;
 		this.transUsidList = transUsidList;
 		blGlobalValGenerator = new BLGlobalValueGenerator();
-		pDialog = new ProgressDialog(context);
+	/*	pDialog = new ProgressDialog(context);
 		pDialog.setMessage(context.getResources().getString(
 				R.string.bl_one_many));
-		pDialog.show();
+		pDialog.show();*/
 
 	}
 
@@ -412,7 +412,7 @@ public class BLOneToManyAsyncTaskHelper extends AsyncTask<String, Void, String> 
 				rListener.receiveResult(OMSMessages.BL_FAILURE.getValue());
 			}
 		}
-		pDialog.dismiss();
+	//	pDialog.dismiss();
 		Log.d(TAG, "Result inInsertUpdateActionCenterAsyncTaskHelper:::"
 				+ result);
 	}

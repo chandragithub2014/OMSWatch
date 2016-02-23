@@ -116,8 +116,8 @@ public class CustomWatchFaceService extends CanvasWatchFaceService {
             switch(tapType) {
                 case WatchFaceService.TAP_TYPE_TAP:
                  /*   Toast.makeText(getApplicationContext(),"TAP_TYPE_TAP",Toast.LENGTH_SHORT).show();*/
-                    Intent i = new Intent(getApplicationContext(),MainActivity.class);
-                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    Intent i = new Intent(CustomWatchFaceService.this,MainActivity.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(i);
                     break;
                 case WatchFaceService.TAP_TYPE_TOUCH:

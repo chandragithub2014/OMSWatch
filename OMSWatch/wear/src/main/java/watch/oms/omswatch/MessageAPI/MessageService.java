@@ -48,6 +48,10 @@ public class MessageService implements  GoogleApiClient.ConnectionCallbacks,
                             result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("config"+"$"+ OMSApplication.getInstance().getConfigDataAPIURL()).getBytes()).await();
                         } if(type.equalsIgnoreCase("transget")){
                             result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("transget"+"$"+ OMSApplication.getInstance().getTransDataAPIURL()).getBytes()).await();
+                        }if(type.equalsIgnoreCase("transpost")){
+                            result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("transpost"+"$"+ OMSApplication.getInstance().getTransPostDataAPIURL()).getBytes()).await();
+                        }if(type.equalsIgnoreCase("imageurl")){
+                            result = Wearable.MessageApi.sendMessage(mGoogleApiClient, node.getId(), "/message_path", ("imageurl"+"$"+ OMSApplication.getInstance().getDataAPIImageURL()).getBytes()).await();
                         }
 
                    /*     if(type.equalsIgnoreCase("worklist")){

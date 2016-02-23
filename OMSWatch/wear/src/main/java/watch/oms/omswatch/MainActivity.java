@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements OMSReceiveListene
                                     loadScreenData.get(i).uniqueId,
                                     loadScreenData.get(i).screenorder, isMain,
                                     filterCoulmnName, filterColumnVal, "", -1,
-                                    loadScreenData.get(i).appId);
+                                    loadScreenData.get(i).appId,false);
                 }
             }
         }

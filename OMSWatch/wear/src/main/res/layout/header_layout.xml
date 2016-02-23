@@ -18,10 +18,13 @@ android:orientation="horizontal"
 <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Save"
+    android:text=""
     android:id="@+id/save_mform"
-    android:visibility="invisible"
-    android:layout_alignParentRight="true"
+    android:layout_alignParentEnd="true"
+    android:visibility="gone"
+    android:layout_marginTop="1dp"
+    android:layout_marginBottom="1dp"
+    android:layout_marginRight="20dp"
 
     ></TextView>
 </RelativeLayout>

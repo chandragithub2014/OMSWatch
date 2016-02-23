@@ -977,6 +977,7 @@ public class WatchTransDBParser implements OMSReceiveListener {
 									+ serverProcessDuration);*/
 					continue;
 				}
+				Log.d(TAG,"ColName::::"+colName);
 				// Get Table Name
 				tableName = servermapperhelper.getClientTableName(colName);
 
@@ -1102,6 +1103,7 @@ public class WatchTransDBParser implements OMSReceiveListener {
 				colValue = null;
 				colName = reader.nextName();
 				colValue = reader.nextString();
+          //      Log.d("TAG","ColName::::"+colName+"::::"+"ColVal:::"+colValue);
 
 				// If Table Name is null, return empty ContentValues
 				if (tableName != null) {
@@ -1252,21 +1254,21 @@ public class WatchTransDBParser implements OMSReceiveListener {
 
 
 
-                        if (!TextUtils.isEmpty(response)) {
+                      /*  if (!TextUtils.isEmpty(response)) {
 // Create a Reader from String
                             Reader stringReader = new StringReader(response);
                             readJsonStream(stringReader);
                             // AppMonitor
-						/*	analyzer.receivedConnectionResponse(connectionID,
+						*//*	analyzer.receivedConnectionResponse(connectionID,
 									urlConnection.getContentLength(),
-									OMSDatabaseConstants.GET_TYPE_REQUEST);*/
+									OMSDatabaseConstants.GET_TYPE_REQUEST);*//*
 
                             configResponse = OMSMessages.CONFIG_DATABASE_PARSE_SUCCESS
                                     .getValue();
                         } else {
                             configResponse = OMSMessages.NETWORK_RESPONSE_ERROR.getValue();
                         }
-                        receiveResult(configResponse);
+                        receiveResult(configResponse);*/
 
                     }
 
@@ -1326,6 +1328,9 @@ public class WatchTransDBParser implements OMSReceiveListener {
 */			//				Log.i(TAG, "ServerTime::"+OMSApplication.getInstance().getServerProcessDuration()+"\t"+"DBTime::"+OMSApplication.getInstance().getDatabaseProcessDuration()+"\t"+serviceURL );
            //     OMSApplication.getInstance().setTraceType(traceType);
                 configResponse =  OMSMessages.BL_SUCCESS.getValue();
+                if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
                 receiveResult(configResponse);
             }else{
               //  Log.e(TAG, "status code[" + urlConnection.getResponseCode() + "] Reason[" + urlConnection.getResponseMessage() + "]");
@@ -1345,6 +1350,9 @@ public class WatchTransDBParser implements OMSReceiveListener {
 
                 if (response.equalsIgnoreCase("transgetfailure")) {
                     configResponse = OMSMessages.ACTION_CENTER_FAILURE.getValue();
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
                     receiveResult(configResponse);
 
                 } else {
@@ -1356,6 +1364,9 @@ public class WatchTransDBParser implements OMSReceiveListener {
                                 OMSMessages.ERROR_DESCRIPTION.getValue(),
                                 jsonObject.get(OMSMessages.ERROR_DESCRIPTION.getValue()));
                         response = jsonObject.toString();
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
                         receiveResult(configResponse);
                     } catch (JSONException e) {
                         Log.e(TAG,

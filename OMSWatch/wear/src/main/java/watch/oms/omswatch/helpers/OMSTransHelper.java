@@ -421,7 +421,7 @@ if(colList.size()>0) {
 	 */
     public Hashtable<String, Object> getTransDataForPrepopulatedMultiForm(
             String tableName, String prePopulatedTransUsid,
-            String whereClauseColumnName, String whereClauseConstant)
+            String whereClauseColumnName, String whereClauseConstant,String retainWhereClause)
             throws Exception {
 
         Cursor transCursor = null;
@@ -468,6 +468,7 @@ if(colList.size()>0) {
                                     + "'"
                                     + OMSApplication.getInstance()
                                     .getGlobalFilterColumnVal() + "'";
+
                         }
                     }
 
@@ -481,12 +482,18 @@ if(colList.size()>0) {
                                 + " <> '1'";
                     }
 
+                    if (retainWhereClause != null) {
+                        selection = retainWhereClause + " AND " + selection;
+                    }
+//Log.d(TAG,"Selection For Prepopulated Form::::"+selection);
                     transCursor = TransDatabaseUtil.query(tableName,
                             null, selection, null, null, null, null);
 
                 }
                 if (transCursor.moveToFirst()) {
                     for (int i = 0; i < columnList.size(); i++) {
+                      /*  Log.d(TAG,"Colmn Name & Col Val:::"+" "+columnList.get(i)+"  "+transCursor.getString(transCursor
+                                .getColumnIndex(columnList.get(i))));*/
                         if (transCursor.getString(transCursor
                                 .getColumnIndex(columnList.get(i))) != null) {
                             transHashTable
@@ -598,5 +605,108 @@ if(colList.size()>0) {
         }
         return (int) updateRow;
     }
+
+
+    public String getURLforTransColumn(String tableName, String columnName) {
+        String imageurl = null;
+        Cursor transDBDataCursor = null;
+        try {
+            if (tableName != null && columnName != null) {
+                transDBDataCursor = TransDatabaseUtil.query(
+                        tableName,
+                        new String[] { OMSDatabaseConstants.UNIQUE_ROW_ID,
+                                columnName },
+                        OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
+                                + " <> '1'", null, null, null, null);
+                if (transDBDataCursor.moveToFirst()) {
+                    imageurl = transDBDataCursor.getString(transDBDataCursor
+                            .getColumnIndex(columnName));
+                }
+                transDBDataCursor.close();
+            }
+        } catch (SQLException e) {
+            Log.e(TAG,
+                    "Error occurred in method getURLforTransColumn  for input parameter tableName["
+                            + tableName + "], columnName[" + columnName
+                            + "]. Error is:" + e.getMessage());
+
+        }
+        if (imageurl != null)
+            if (imageurl.contains("http"))
+                imageurl = imageurl.replace(" ", "%20");
+        return imageurl;
+    }
+
+
+    /**
+     * Retrieves the list of trans usids to be used for BL
+     *
+     * @param tableName
+     * @return ArrayList<String>
+     */
+    public ArrayList<String> getTransUsids(String tableName, String tempQuery,
+                                           String filterCoulmnName, String whereClauseColumnName,
+                                           String whereClauseConstant) throws Exception {
+        ArrayList<String> transList = new ArrayList<String>();
+        Cursor transDBDataCursor = null;
+        String selection = null;
+        try {
+            if (whereClauseColumnName != null
+                    && whereClauseColumnName.length() > 0) {
+                if (whereClauseConstant != null
+                        && whereClauseConstant.length() > 0) {
+                    selection = whereClauseColumnName + " = " + "'"
+                            + whereClauseConstant + "'";
+                } else {
+                    selection = whereClauseColumnName
+                            + " = "
+                            + "'"
+                            + OMSApplication.getInstance()
+                            .getGlobalFilterColumnVal() + "'";
+                }
+            }
+            if (selection != null) {
+                selection = selection + " AND "
+                        + OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
+                        + " <> '1'";
+            } else {
+                selection = OMSDatabaseConstants.CONFIG_TRANS_DB_IS_DELETE
+                        + " <> '1'";
+            }
+            if (tempQuery != null) {
+                transDBDataCursor = TransDatabaseUtil.query(
+                        tableName,
+                        new String[] { OMSDatabaseConstants.UNIQUE_ROW_ID,
+                                tempQuery }, selection, null, null, null, null);
+            } else {
+                transDBDataCursor = TransDatabaseUtil.query(tableName,
+                        new String[] { OMSDatabaseConstants.UNIQUE_ROW_ID },
+                        selection, null, null, null, null);
+            }
+            if (transDBDataCursor.moveToFirst()) {
+                do {
+                    transList
+                            .add(transDBDataCursor.getString(transDBDataCursor
+                                    .getColumnIndex(OMSDatabaseConstants.UNIQUE_ROW_ID)));
+                } while (transDBDataCursor.moveToNext());
+            }
+            transDBDataCursor.close();
+
+        } catch (SQLException e) {
+            Log.e(TAG,
+                    "Error occurred in method getTransUsids  for input parameter tableName["
+                            + tableName + "], tempQuery[" + tempQuery
+                            + "], filterCoulmnName[" + filterCoulmnName
+                            + "]. Error is:" + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG,
+                    "Error occurred in method getTransUsids  for input parameter tableName["
+                            + tableName + "], tempQuery[" + tempQuery
+                            + "], filterCoulmnName[" + filterCoulmnName
+                            + "]. Error is:" + e.getMessage());
+        }
+        return transList;
+    }
+
 
 }

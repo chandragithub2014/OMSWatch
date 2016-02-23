@@ -17,6 +17,7 @@
     import android.widget.RelativeLayout;
     import android.widget.TextView;
 
+    import java.lang.reflect.Field;
     import java.util.ArrayList;
     import java.util.HashMap;
     import java.util.List;
@@ -27,6 +28,7 @@
     import watch.oms.omswatch.OMSFactory;
     import watch.oms.omswatch.OMSLoadScreenHelper;
     import watch.oms.omswatch.R;
+    import watch.oms.omswatch.actioncenter.blexecutor.BLExecutorActionCenter;
     import watch.oms.omswatch.adapters.OMSListAdapter;
     import watch.oms.omswatch.adapters.WearableListItemLayout;
     import watch.oms.omswatch.application.OMSApplication;
@@ -38,6 +40,11 @@
     import watch.oms.omswatch.helpers.NavigationHelper;
     import watch.oms.omswatch.helpers.OMSTransHelper;
     import watch.oms.omswatch.interfaces.OMSListDetailListener;
+    import watch.oms.omswatch.interfaces.OMSReceiveListener;
+    import watch.oms.omswatch.toolbar.ToolBarGenerator;
+    import watch.oms.omswatch.toolbar.ToolBarHelper;
+    import watch.oms.omswatch.toolbar.dto.ToolBarConfigDTO;
+    import watch.oms.omswatch.toolbar.dto.ToolBarDTO;
 
     /**
     /**
@@ -45,7 +52,7 @@
      * Use the {@link ListScreenFragment#} factory method to
      * create an instance of this fragment.
      */
-    public class ListScreenFragment extends Fragment implements OMSListDetailListener{
+    public class ListScreenFragment extends Fragment implements OMSListDetailListener,OMSReceiveListener{
         // TODO: Rename parameter arguments, choose names that match
 
         private final String TAG = this.getClass().getSimpleName();
@@ -91,6 +98,21 @@
 
         ImageView backFromForm;
 
+        private String launchBL="";
+        public List<String> trnsUsidList = new ArrayList<String>();
+        private Activity currentActivity;
+        private boolean isViewCreated = false;
+        private boolean isFromBack = false;
+        private String listScreenUSID = "";
+        TextView toolBar;
+        private String filterColumnName;
+
+        List<ToolBarDTO> toolBarDataList = new ArrayList<ToolBarDTO>();
+        List<String> navUsIdList;
+        List<ToolBarConfigDTO> toolBarData;
+        ArrayList<String> transUsidlist = null;
+        TextView saveForm;
+
         public ListScreenFragment() {
             // Required empty public constructor
         }
@@ -112,6 +134,8 @@
         }
 
 
+
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -127,6 +151,8 @@
                         .getValue());
                 isBack  =  getArguments().getBoolean(OMSMessages.IS_BACK
                         .getValue());
+                isFromBack = getArguments().getBoolean(OMSMessages.IS_FROM_BACK
+                        .getValue());
 
 
             }
@@ -139,8 +165,7 @@
             Log.d(TAG, "OnCreateView");
             Toolbar mToolBar = (Toolbar)getActivity().findViewById(R.id.toolbar);
             ImageView back_img = (ImageView)mToolBar.findViewById(R.id.back);
-           TextView saveForm = (TextView)mToolBar.findViewById(R.id.save_form);
-            saveForm.setVisibility(View.GONE);
+
 
 
 
@@ -157,6 +182,8 @@
             listView = inflater.inflate(R.layout.fragment_list_screen, container, false);
             RelativeLayout formHeaderLayout = (RelativeLayout)listView.findViewById(R.id.form_header);
             backFromForm = (ImageView)formHeaderLayout.findViewById(R.id.back_form);
+            saveForm = (TextView)formHeaderLayout.findViewById(R.id.save_mform);
+            saveForm.setVisibility(View.GONE);
 
             if(!isBack) {
                 backFromForm.setVisibility(View.VISIBLE);
@@ -182,6 +209,7 @@
                     (WearableListView) listView.findViewById(R.id.watch_List);
             wearableListView.setClickListener(mClickListener);
 if(listScreenMap!=null && listScreenMap.size()>0) {
+    launchBL = listScreenMap.get(OMSDatabaseConstants.LAUNCH_BL);
     if (listScreenMap.get(OMSDatabaseConstants.LIST_TYPE).equalsIgnoreCase(OMSConstants.LIST_HETEROGENEOUS_TYPE)) {
         listChilds = fetchChildsForList();
         prepareDataForHeterogeneousList();
@@ -208,14 +236,87 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
             }*/
         }
     }
+    listScreenUSID = listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_UNIQUE_ID);
+       int showToolbar = Integer.parseInt(listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_SHOW_TOOL_BAR));
+    Log.d(TAG,"ShowToolBar::::"+showToolbar);
+             if(showToolbar==1){
+             saveForm.setVisibility(View.VISIBLE);
+           //  saveForm.setText("checkout");
+
+             ToolBarHelper tBarHelper = new ToolBarHelper();
+
+             try {
+                 transUsidlist = transHelper.getTransUsids(
+                         listScreenMap.get(OMSDatabaseConstants.LIST_SCREEN_DATA_TABLE_NAME), null, filterColumnName,
+                         whereColumnName, whereColumnConstant);
+             } catch (Exception e) {
+                 Log.e(TAG, "Exception while getting trans details from DB.:"
+                         + e.getMessage());
+             }
+
+
+
+             // get ToolBar data from ToolBar Table
+             toolBarData = tBarHelper.getToolBarData(listScreenUSID, configDBAppId);
+
+             navUsIdList = new ArrayList<String>();
+             if (toolBarData.size() > 0) {
+                 for (int i = 0; i < toolBarData.size(); i++) {
+                     Log.d(TAG,"ToolBarTitle"+toolBarData.get(i).buttonTitle);
+                     saveForm.setText(toolBarData.get(i).buttonTitle);
+                     if (toolBarData.get(i).nav_usid != null
+                             && !toolBarData.get(i).nav_usid.trim().equals("")) {
+
+                         navUsIdList.add(toolBarData.get(i).nav_usid);
+
+
+                     }
+                 }
+             }
+             if (navUsIdList.size() > 0) {
+                 toolBarDataList = tBarHelper.getToolBarItemsDetails(
+                         navUsIdList, configDBAppId);
+             }
+             saveForm.setOnClickListener(new View.OnClickListener() {
+                 @Override
+                 public void onClick(View v) {
+                     if (toolBarData.size() > 0) {
+
+                         ToolBarGenerator toolBarGenerator = new ToolBarGenerator(
+                                 currentActivity, this, mContainerId,
+                                 ListScreenFragment.this, transUsidlist, configDBAppId,
+                                 filterColumnName, OMSApplication.getInstance()
+                                 .getGlobalFilterColumnVal(),saveForm);
+                         toolBarGenerator.performToolBarAction(toolBarData,
+                                 toolBarDataList, navUsid);
+                     }
+                 }
+             });
+
+
+         }
+
+
+
+
 }
             WearableListView.ItemDecoration itemDecoration =
                     new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST);
             wearableListView.addItemDecoration(itemDecoration);
+            //Log.d("ListScreenFragment", "isViewCreated"+isViewCreated);
+            if(!TextUtils.isEmpty(launchBL) && !isFromBack) {
+                executeLauchBL();
+            }
             return listView;
         }
 
 
+        private void executeLauchBL(){
+          //  refreshList = true;
+            new BLExecutorActionCenter(activityContext, mContainerId,
+                    ListScreenFragment.this, configDBAppId,
+                    trnsUsidList).doBLAction(launchBL);
+        }
         private void initializeHelpers() {
             listDBHelper = new ListHelper();
             navigationHelper = new NavigationHelper();
@@ -421,7 +522,7 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                                     navigationItems.screenorder, false,
                                     null, null, "",
                                     OMSDefaultValues.NONE_DEF_CNT.getValue(),
-                                    navigationItems.appId);
+                                    navigationItems.appId,false);
                 }
             }
         }
@@ -436,7 +537,7 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                                 navigationItems.screenorder, false,
                                 null, null, "",
                                 OMSDefaultValues.NONE_DEF_CNT.getValue(),
-                                navigationItems.appId);
+                                navigationItems.appId,false);
             }
         }
 
@@ -477,7 +578,7 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                                 navigationItems.screenorder, isBack  ,
                                 null, null, "",
                                 OMSDefaultValues.NONE_DEF_CNT.getValue(),
-                                navigationItems.appId);
+                                navigationItems.appId,true);
             }
             }
         }
@@ -530,5 +631,23 @@ if(listScreenMap!=null && listScreenMap.size()>0) {
                     .addToBackStack("null").commit();
         }
 
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            try {
+                Field childFragmentManager = Fragment.class.getDeclaredField("mChildFragmentManager");
+                childFragmentManager.setAccessible(true);
+                childFragmentManager.set(this, null);
 
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void receiveResult(String result) {
+
+        }
     }

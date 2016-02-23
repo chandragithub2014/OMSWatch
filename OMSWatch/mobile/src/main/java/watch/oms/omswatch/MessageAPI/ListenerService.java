@@ -1,17 +1,34 @@
 package watch.oms.omswatch.MessageAPI;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.text.TextUtils;
 import android.util.Log;
 
 
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.wearable.Asset;
+import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import watch.oms.omswatch.MainActivity;
 import watch.oms.omswatch.Parser.OMSConfigDBParser;
+import watch.oms.omswatch.Parser.PostAsyncTaskHelper;
 import watch.oms.omswatch.Parser.TransDBParser;
 import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.OMSMessages;
@@ -41,6 +58,22 @@ public class ListenerService extends WearableListenerService  implements OMSRece
                Log.d("TAG","transURL::::"+transURL);
                webServiceMessage = transURL;
                OMSApplication.getInstance().setTransDataAPIURL(transURL);
+               makeWebServiceCalls("transget");
+           }else if(message.contains("transpost")){
+             String transPostURL = message.substring(message.lastIndexOf("$") + 1);
+               Log.d("TAG","transPostURL::::"+transPostURL);
+               webServiceMessage = transPostURL;
+               OMSApplication.getInstance().setTransPostDataAPIURL(transPostURL);
+               makeWebServiceCalls("transpost");
+           }else if(message.contains("imageurl")){
+               String imageURL = message.substring(message.lastIndexOf("$") + 1);
+               Log.d("TAG","ImageURL::::::"+imageURL);
+               OMSApplication.getInstance().setDataAPIImageURL(imageURL);
+
+
+
+
+               MessageService.getInstance().startMessageService(getApplicationContext(), "imageurl");
            }
 
            /* else  if(message.equalsIgnoreCase("companion")) {
@@ -136,11 +169,29 @@ public class ListenerService extends WearableListenerService  implements OMSRece
         }
     }*/
 
+
     private void makeWebServiceCalls(String type){
        if(type.equalsIgnoreCase("config")){
            new OMSConfigDBParser(ListenerService.this, ListenerService.this).execute(OMSApplication.getInstance().getConfigDataAPIURL());
        } else if(type.equalsIgnoreCase("transget")){
           new TransDBParser(ListenerService.this,ListenerService.this).execute(OMSApplication.getInstance().getTransDataAPIURL());
+       }else if(type.equalsIgnoreCase("transpost")){
+             String response = OMSApplication.getInstance().getTransPostDataAPIURL();
+           String transURL = "";
+           JSONObject jsonPayload = null;
+           try {
+               JSONObject jsonObject = new JSONObject(response);
+               transURL  = jsonObject.getString("posturl");
+               jsonPayload = (jsonObject.getJSONObject("jsonpayload"));
+
+           }
+
+           catch (JSONException e){
+               e.printStackTrace();
+           }
+           if(!TextUtils.isEmpty(transURL) && jsonPayload!=null){
+               new PostAsyncTaskHelper(ListenerService.this,ListenerService.this,jsonPayload).execute(transURL);
+           }
        }
     }
     @Override
@@ -175,6 +226,10 @@ public class ListenerService extends WearableListenerService  implements OMSRece
             MessageService.getInstance().startMessageService(getApplicationContext(), "transget");
         }else if(result.equalsIgnoreCase("transgetsuccess")){
             MessageService.getInstance().startMessageService(getApplicationContext(), "transget");
+        }else if(result.equalsIgnoreCase("transpostsuccess")){
+            MessageService.getInstance().startMessageService(getApplicationContext(), "transpost");
+        }else if(result.equalsIgnoreCase("transpostfailure")){
+            MessageService.getInstance().startMessageService(getApplicationContext(), "transpost");
         }
 
     }

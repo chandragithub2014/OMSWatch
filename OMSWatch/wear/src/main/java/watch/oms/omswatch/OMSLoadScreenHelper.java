@@ -48,6 +48,7 @@ public class OMSLoadScreenHelper {
 	private NavigationHelper navHelper;
 
 	public OMSLoadScreenHelper(Activity c, int containerId) {
+		Log.d(TAG,"Context:::"+c);
 		this.context = c;
 		this.mContainerId = containerId;
 		navHelper = new NavigationHelper();
@@ -70,7 +71,7 @@ public class OMSLoadScreenHelper {
 	public void loadTargetScreen(String screenType, int navId, String navUsid,
 			int screenOrder, boolean isFullScreen, boolean isMain,
 			String filterColumnName, String filterColumnVal,
-			String headerTitle, int customScreenContainerId, int appId) {
+			String headerTitle, int customScreenContainerId, int appId,boolean isFromBack) {
 		OMSApplication.getInstance().setNavUsid(navUsid);
 		OMSApplication.getInstance().setScrollerTemplate(false);
 		Log.d(TAG, "method loadTargetScreen, ScreenType:" + screenType
@@ -109,6 +110,7 @@ public class OMSLoadScreenHelper {
             bundle.putInt(OMSMessages.CONFIGAPP_ID.getValue(), appId);
             bundle.putBoolean(OMSMessages.SHOW_LOGOUT.getValue(), enableLogout);
 			bundle.putBoolean(OMSMessages.IS_BACK.getValue(),isMain);
+			bundle.putBoolean(OMSMessages.IS_FROM_BACK.getValue(),isFromBack);
 /*			bundle.putBoolean(OMSMessages.SCREEN_MODE.getValue(),
 					((OMSApplication.getInstance().isSplitView())));*/
             Fragment listFragment = OMSFactory.getInstance(OMSFactory.TemplateType.List,
@@ -118,7 +120,7 @@ public class OMSLoadScreenHelper {
             //
             if (isMain) {
                 fm.beginTransaction().replace(mContainerId, listFragment)
-                        .commit();
+                        .commitAllowingStateLoss();
             } else {
                 bundle.putBoolean(OMSMessages.SPLIT_VIEW.getValue(), false);
                 fm.beginTransaction().replace(mContainerId, listFragment)
@@ -126,7 +128,7 @@ public class OMSLoadScreenHelper {
                         .commit();
             }
         }else if (screenType
-				.equalsIgnoreCase(OMSConstants.MULTI_FORM_SCREEN_TYPE) || screenType.equalsIgnoreCase("Form")) {
+				.equalsIgnoreCase(OMSConstants.MULTI_FORM_SCREEN_TYPE) || screenType.equalsIgnoreCase("Form") || screenType.equalsIgnoreCase("Watch MultiForm")) {
             Fragment multiFormScreenFragment = OMSFactory.getInstance(
                     OMSFactory.TemplateType.MultiForm, navUsid);
             bundle = new Bundle();
@@ -135,7 +137,8 @@ public class OMSLoadScreenHelper {
             bundle.putInt(OMSMessages.CUSTOM_CONTAINERID.getValue(),
                     customScreenContainerId);
             bundle.putBoolean(OMSMessages.IS_LOADSCREEN.getValue(), true);
-
+			bundle.putInt(OMSMessages.SCREEN_ORDER.getValue(), screenOrder);
+			bundle.putBoolean(OMSMessages.IS_FROM_BACK.getValue(), isFromBack);
             multiFormScreenFragment.setArguments(bundle);
             fm.beginTransaction().replace(mContainerId, multiFormScreenFragment)
                     .addToBackStack(OMSMessages.NULL_STRING.getValue())
@@ -823,10 +826,10 @@ public class OMSLoadScreenHelper {
 	public void loadTargetScreen(String screenType, int navId, String usid,
 			int screenOrder, boolean isMain, String filterColumnName,
 			String filterColumnVal, String uiHeadingTitle,
-			int customScreenContainerId, int appId) {
+			int customScreenContainerId, int appId,boolean isFromBack) {
 		loadTargetScreen(screenType, navId, usid, screenOrder, true, isMain,
 				filterColumnName, filterColumnVal, uiHeadingTitle,
-				customScreenContainerId, appId);
+				customScreenContainerId, appId,isFromBack);
 	}
 
 }

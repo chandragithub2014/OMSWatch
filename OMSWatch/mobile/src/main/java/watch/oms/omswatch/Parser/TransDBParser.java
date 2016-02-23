@@ -290,9 +290,9 @@ public class TransDBParser extends AsyncTask<String, Void, String> {
 		if (rListener != null) {
 			rListener.receiveResult(result);
 		}
-		if (progressDialog.isShowing()) {
+	/*	if (progressDialog.isShowing()) {
 			progressDialog.dismiss();
-		}
+		}*/
 		Log.d(TAG, "Trans DB End:::"+System.currentTimeMillis());
 	}
 
@@ -441,6 +441,7 @@ public class TransDBParser extends AsyncTask<String, Void, String> {
 		InputStream inputStream = null;
 		HttpURLConnection urlConnection = getHttpURLConnection(serviceURL);
 		  try {
+			  urlConnection.setConnectTimeout(50000);
 			  urlConnection.connect();
 			}  catch (SocketException e) {
 				Log.e(TAG,

@@ -3,13 +3,19 @@ package watch.oms.omswatch.fragments;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.speech.RecognizerIntent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -43,10 +49,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import watch.oms.omswatch.MessageAPI.MessageService;
 import watch.oms.omswatch.OMSDTO.NavigationItems;
 import watch.oms.omswatch.OMSDTO.PickerItems;
 import watch.oms.omswatch.OMSLoadScreenHelper;
 import watch.oms.omswatch.R;
+import watch.oms.omswatch.actioncenter.blexecutor.BLExecutorActionCenter;
 import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.OMSConstants;
 import watch.oms.omswatch.constants.OMSDatabaseConstants;
@@ -55,6 +63,7 @@ import watch.oms.omswatch.constants.OMSMessages;
 import watch.oms.omswatch.helpers.MultiFormScreenHelper;
 import watch.oms.omswatch.helpers.NavigationHelper;
 import watch.oms.omswatch.helpers.OMSTransHelper;
+import watch.oms.omswatch.interfaces.OMSReceiveListener;
 import watch.oms.omswatch.interfaces.SendDataDialogListener;
 import watch.oms.omswatch.utils.CustomToast;
 import watch.oms.omswatch.utils.ReadableDateGenerator;
@@ -62,6 +71,7 @@ import watch.oms.omswatch.widgets.DatePickerDialogFragment;
 import watch.oms.omswatch.widgets.TimePickerDialogFragment;
 import watch.oms.omswatch.widgets.WatchButton;
 import watch.oms.omswatch.widgets.WatchEditText;
+import watch.oms.omswatch.widgets.WatchImageView;
 import watch.oms.omswatch.widgets.WatchSpinner;
 import watch.oms.omswatch.widgets.WatchTextView;
 
@@ -70,7 +80,7 @@ import watch.oms.omswatch.widgets.WatchTextView;
  * Use the {@link MultiFormFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MultiFormFragment extends Fragment implements SendDataDialogListener ,View.OnClickListener {
+public class MultiFormFragment extends Fragment implements SendDataDialogListener ,View.OnClickListener,OMSReceiveListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -132,7 +142,16 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
     private boolean isBack = true;
     private NavigationHelper navigationHelper = null;
     private int mContainerId = OMSDefaultValues.NONE_DEF_CNT.getValue();
+    private String whereColName="";
+    private  String whereColConst="";
+    private int screenOrder = -1;
+    private List<NavigationItems> childScreenItemsList = null;
+    private String formButtonBL = null;
+    private String formButtonType = null;
 
+    private String retainWhereString = null;
+
+    private boolean isFromBack = false;
     public MultiFormFragment() {
         // Required empty public constructor
     }
@@ -166,16 +185,21 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
 
 
             navusid = args.getString(OMSMessages.UNIQUE_ID.getValue());
+            Log.d(TAG,"NavUSID::::"+navusid);
             uiHeadingTitle = args.getString(OMSMessages.TITLE.getValue());
             isPrepopulated = args.getBoolean(OMSMessages.IS_PREPOPULATED
                     .getValue());
             transUniqueId = args.getString(OMSMessages.TRANS_USID.getValue());
+            Log.d(TAG,"TransUniqueID::::"+transUniqueId);
             customContainerId = args.getInt(OMSMessages.CUSTOM_CONTAINERID
                     .getValue());
             configDBAppId = args.getInt(OMSMessages.CONFIGAPP_ID.getValue());
             isFromLoadScreen = args.getBoolean(OMSMessages.IS_LOADSCREEN
                     .getValue());
             isBack  =  getArguments().getBoolean(OMSMessages.IS_BACK
+                    .getValue());
+            screenOrder  =  getArguments().getInt(OMSMessages.SCREEN_ORDER.getValue());
+            isFromBack = getArguments().getBoolean(OMSMessages.IS_FROM_BACK
                     .getValue());
             /*screenMode = args.getBoolean(OMSMessages.SCREEN_MODE.getValue(),
                     true);
@@ -201,7 +225,46 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
         multiFormScreenHelper = new MultiFormScreenHelper(activityContext);
         transUsidList = new ArrayList<String>();
         navigationHelper = new NavigationHelper();
+        transUsidList = new ArrayList<String>();
     }
+
+    private void initializeBroadCastReceiver(){
+        // Register the local broadcast receiver
+        IntentFilter messageFilter = new IntentFilter(Intent.ACTION_SEND);
+        MessageReceiver messageReceiver = new MessageReceiver();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(messageReceiver, messageFilter);
+    }
+
+    //
+      //MessageReceiver
+    public class MessageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            //  String message = intent.getStringExtra("message");
+            //Log.v("myTag", "Main activity received message: " + message);
+
+
+            //
+            if(intent.hasExtra("byteArray")) {
+
+                Bitmap b = BitmapFactory.decodeByteArray(
+                        intent.getByteArrayExtra("byteArray"), 0, intent.getByteArrayExtra("byteArray").length);
+                int imageId = OMSApplication.getInstance().getImageID();
+               // productImage.setImageBitmap(b);
+                int imageViewID = OMSApplication.getInstance().getImageID();
+                ImageView dataLayerAPIImage = (ImageView)view.findViewById(imageViewID);
+                dataLayerAPIImage.setImageBitmap(b);
+            }
+            //
+            // Display message in UI
+            //  mTextView.setText(message);
+        }
+    }
+
+
+    //
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -254,6 +317,15 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
             if(Integer.parseInt(formDataMap.get(OMSDatabaseConstants.FORM_SCREEN_IS_PREPOPULATED))!=0){
              isPrepopulated = true;
             }
+            if(!TextUtils.isEmpty(formDataMap.get(OMSDatabaseConstants.WHERE_COLUMN_NAME))){
+                whereColName = formDataMap.get(OMSDatabaseConstants.WHERE_COLUMN_NAME);
+            }
+
+            if(!TextUtils.isEmpty(formDataMap.get(OMSDatabaseConstants.WHERE_CONSTANT))){
+                whereColConst = formDataMap.get(OMSDatabaseConstants.WHERE_CONSTANT);
+            }
+
+
         }
 //multiFormScreenuniqueId = multiFormScreenDataCursor .getString(multiFormScreenDataCursor.getColumnIndex(OMSDatabaseConstants.MULTI_FORM_SCREEN_UNIQUE_ID));
         if (multiFormScreenuniqueId != null) {
@@ -261,6 +333,8 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                     .getMultiFormScreenGridItems(multiFormScreenuniqueId,
                             configDBAppId);
         }
+
+
         Log.d(TAG, "FormItems Hash Size:::" + formGridItemsHash.size());
         if (formGridItemsHash != null && formGridItemsHash.size() > 0) {
             createFormUserInterface(getActivity(), false);
@@ -274,13 +348,20 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
         Log.d(TAG, "In createFormUserInterface()");
         Hashtable<String, Object> transHashTable = null;
         String columnContent = "";
-
+        String blName = "";
+     //Log.d(TAG,"ISPREPOPULATED::::"+isPrepopulated+"WHERECOLUMNNAME:::::"+whereColName);
         if (isPrepopulated) {
+
+            //Get RetainMap
+            Map<String, String> mapRetainClauses = OMSApplication.getInstance().getRetainWhereClause();
+            if(mapRetainClauses != null && !mapRetainClauses.isEmpty()){
+                 retainWhereString = mapRetainClauses.get(navusid);
+            }
             try {
                 transHashTable = tdbHelper
                         .getTransDataForPrepopulatedMultiForm(
                                 multiFormScreenDataTableName,
-                                transUniqueId, "", "");
+                                transUniqueId, whereColName, whereColConst,retainWhereString);
             }catch (Exception e) {
                 e.printStackTrace();
             }
@@ -318,6 +399,8 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                     }
                     if (!TextUtils.isEmpty(tempHashTable.get("columncontent").toString().trim())) {
                         columnContent = tempHashTable.get("columncontent").toString().trim();
+                    }else{
+                        columnContent = "";
                     }
 
                     if (!(TextUtils.isEmpty(widgetType))
@@ -330,7 +413,7 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                 formParentLayout.addView(label);
 
                                         if(isPrepopulated){
-
+                                 Log.d(TAG,"ColumnContent::::"+columnContent);
                                             if (columnContent != null
                                                     && columnContent.length() > 0) {
                                                 Object colVal = transHashTable
@@ -402,11 +485,62 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                             });*/
 
                         } else if (widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_BUTTON_TYPE)) {
+                            String buttonId = (String) tempHashTable
+                                    .get("columnid");
+                           blName  =  (String) tempHashTable
+                                    .get("blname");
+                            final String buttonType =  (String) tempHashTable
+                                    .get("type");
 
+                            if (buttonId == null
+                                    || !(buttonId.length() > 0)
+                                    || buttonId.equals("")) {
+                                buttonId = OMSMessages.MIN_INDEX_STR
+                                        .getValue();
+                            }
+                            final int buttonActionId = Integer
+                                    .parseInt(buttonId);
                             if (!isSave) {
                                 Button watchButton = WatchButton.getInstance().fetchButton(getActivity(), widgetName, widgetIds[i], null);
                                 Log.d(TAG, "I val ..." + i);
+                                formButtonBL = blName;
+                                watchButton.setTag(formButtonBL);
                                 formParentLayout.addView(watchButton);
+                                watchButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        childScreenItemsList = new NavigationHelper()
+                                                .getChildForButton(
+                                                        buttonActionId,
+                                                        configDBAppId,
+                                                        screenOrder);
+                                        String buttonBl = (String) v.getTag();
+                                        formButtonBL=buttonBl;
+                                        formButtonType = buttonType;
+                                        if (!TextUtils
+                                                .isEmpty(formButtonType)
+                                                && formButtonType
+                                                .equalsIgnoreCase("save")) {
+                                            processSaveButton(
+                                                    buttonActionId,
+                                                    formButtonBL, "save");
+                                        }
+                                       else if (!TextUtils
+                                                .isEmpty(formButtonBL)) {
+                                            new BLExecutorActionCenter(
+                                                    activityContext,
+                                                    mContainerId,
+                                                    MultiFormFragment.this,
+                                                    configDBAppId,
+                                                    transUsidList)
+                                                    .doBLAction(formButtonBL);
+
+                                        } else {
+                                            receiveResult(OMSMessages.REFRESH
+                                                    .getValue());
+                                        }
+                                    }
+                                });
                             }
                         } else if (widgetType.equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_DATE_PICKER_TYPE)) {
 
@@ -694,7 +828,69 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                     }
                                 }
                             }
-                        } else if (widgetType
+                        }else if(widgetType
+                                .equalsIgnoreCase(OMSDatabaseConstants.MULTI_FORM_SCREEN_IMAGE_VIEW)){
+                            ImageView formImage = null;
+                            if(!isSave){
+                                formImage = WatchImageView.getInstance().fetchImageView(getActivity(),"WatchImage",widgetIds[i],null);
+                                formParentLayout.addView(formImage);
+                                String imageColumnContent = (String) tempHashTable
+                                        .get("columncontent");
+                                String imageURL = null;
+                                if(isPrepopulated){
+                                    if(!isFromLoadScreen){
+                                        imageURL = (String) transHashTable
+                                                .get(tempHashTable.get("columncontent"));
+                                    }else{
+
+                                        imageURL = (String) transHashTable
+                                                .get(tempHashTable.get("columncontent"));
+                                        if (imageURL != null
+                                                && imageURL.length() > 0
+                                                && imageURL
+                                                .contains(OMSMessages.HTTP_PREFIX
+                                                        .getValue())) {
+                                        } else {
+                                            imageURL = tdbHelper
+                                                    .getURLforTransColumn(
+                                                            multiFormScreenDataTableName,
+                                                            imageColumnContent);
+                                        }
+
+                                    }
+                                }
+
+                                if(!TextUtils.isEmpty(imageURL)) {
+                                    if (imageURL.contains(OMSMessages.HTTP_PREFIX.getValue())
+                                            || imageURL.contains(OMSMessages.HTTPS_PREFIX.getValue())) {
+                                        formImage.setImageResource(R.drawable.ic_launcher);
+                                        //Make Call to Data Layer API
+                                        //formImage.setImageUrl(imageURL);
+                                        OMSApplication.getInstance().setImageID(widgetIds[i]);
+                                        OMSApplication.getInstance().setDataAPIImageURL(imageURL);
+                                        MessageService.getInstance().startMessageService(getActivity(),"imageurl");
+                                        formImage.setScaleType(ImageView.ScaleType.CENTER);
+                                    }else{
+                                        if(imageURL.contains("."))
+                                            imageURL = imageURL.substring(0,imageURL.indexOf("."));
+
+                                        int id = getActivity().getResources().getIdentifier(imageURL,
+                                                OMSConstants.DRAWABLE, getActivity().getPackageName());
+                                        if (id > 0) {
+                                            formImage.setImageResource(getActivity().getResources()
+                                                    .getIdentifier(imageURL, OMSConstants.DRAWABLE,
+                                                            getActivity().getPackageName()));
+                                        }
+                                        formImage.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                                    }
+                                }else{
+                                    formImage.setScaleType(ImageView.ScaleType.CENTER);
+                                    formImage.setImageResource(R.drawable.ic_launcher);
+                                }
+                            }
+
+                        }
+                        else if (widgetType
                                 .equalsIgnoreCase("none")) {
                             if (!isSave) {
                                 TextView label = WatchTextView.getInstance().fetchTextView(getActivity(), "Empty", widgetIds[i], null);
@@ -710,6 +906,22 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
         }
     }
 
+    private void processSaveButton(int buttonActionId, String saveBlName, String buttonType) {
+        createFormUserInterface(getActivity(),true);
+        saveFormData();
+        childScreenItemsList = new NavigationHelper()
+                .getChildForButton(buttonActionId, configDBAppId,
+                        screenOrder);
+
+        if ((!TextUtils.isEmpty(saveBlName)
+                && !saveBlName.equalsIgnoreCase("No BL"))
+                && !buttonType.equalsIgnoreCase("Log-in")) {
+            new BLExecutorActionCenter(activityContext, mContainerId,
+                    MultiFormFragment.this, configDBAppId, transUsidList)
+                    .doBLAction(saveBlName);
+
+        }
+    }
 
     // Create an intent that can start the Speech Recognizer activity
     private void displaySpeechRecognizer() {
@@ -884,7 +1096,10 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                     ""
                                             + savedInsertedId);
 
-
+                    if (transUsidList != null) {
+                        transUsidList.clear();
+                        transUsidList.add(usid);
+                    }
                     Log.d(TAG, "Save Sucess");
                 }else if (savedInsertedId != OMSDefaultValues.NONE_DEF_CNT
                         .getValue()){
@@ -898,7 +1113,10 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                     if(updatedRows < 1 )
                         savedInsertedId =  -1;
 
-
+                    if (transUsidList != null) {
+                        transUsidList.clear();
+                        transUsidList.add(usid);
+                    }
                     Log.d(TAG, "Updated " + savedInsertedId + "Rows");
 
 
@@ -933,8 +1151,23 @@ public class MultiFormFragment extends Fragment implements SendDataDialogListene
                                 navigationItems.screenorder, isBack  ,
                                 null, null, "",
                                 OMSDefaultValues.NONE_DEF_CNT.getValue(),
-                                navigationItems.appId);
+                                navigationItems.appId,true);
             }
         }
+    }
+
+    @Override
+    public void receiveResult(String result) {
+        if (childScreenItemsList != null && childScreenItemsList.size() > 0) {
+            new OMSLoadScreenHelper(activityContext, mContainerId)
+                    .loadTargetScreen(childScreenItemsList.get(0).screentype,
+                            childScreenItemsList.get(0).parent_id,
+                            childScreenItemsList.get(0).uniqueId,
+                            childScreenItemsList.get(0).screenorder, false,
+                            null, null, "",
+                            OMSDefaultValues.NONE_DEF_CNT.getValue(),
+                            childScreenItemsList.get(0).appId,false);
+        }
+
     }
 }

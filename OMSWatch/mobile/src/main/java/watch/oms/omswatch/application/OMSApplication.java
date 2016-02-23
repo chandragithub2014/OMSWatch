@@ -95,6 +95,9 @@ public class OMSApplication<autoButtonNavHash> extends Application {
     private String configDataAPIResponse;
     private String transDataAPIURL;
 	private String transDataAPIResponse;
+	private String transPostDataAPIURL;
+	private String transPostDataAPIResponse;
+	private String  dataAPIImageURL;
 
 	public int getRoleID() {
 		return 1;
@@ -619,4 +622,28 @@ public class OMSApplication<autoButtonNavHash> extends Application {
 	public void setTransDataAPIResponse(String transDataAPIResponse) {
 		this.transDataAPIResponse = transDataAPIResponse;
 	}
+
+    public String getTransPostDataAPIResponse() {
+        return transPostDataAPIResponse;
+    }
+
+    public void setTransPostDataAPIResponse(String transPostDataAPIResponse) {
+        this.transPostDataAPIResponse = transPostDataAPIResponse;
+    }
+
+    public String getTransPostDataAPIURL() {
+        return transPostDataAPIURL;
+    }
+
+    public void setTransPostDataAPIURL(String transPostDataAPIURL) {
+        this.transPostDataAPIURL = transPostDataAPIURL;
+    }
+
+    public String getDataAPIImageURL() {
+        return dataAPIImageURL;
+    }
+
+    public void setDataAPIImageURL(String dataAPIImageURL) {
+        this.dataAPIImageURL = dataAPIImageURL;
+    }
 }

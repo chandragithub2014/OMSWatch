@@ -19,6 +19,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -50,6 +51,7 @@ import watch.oms.omswatch.actioncenter.helpers.ActionCenterHelper;
 import watch.oms.omswatch.actioncenter.helpers.PostAsyncTaskHelper;
 //import watch.oms.omswatch.actioncenter.helpers.ServerDBUpdateHelper;
 import watch.oms.omswatch.actioncenter.helpers.TransDBParser;
+import watch.oms.omswatch.actioncenter.helpers.WatchPostAsyncTaskHelper;
 import watch.oms.omswatch.actioncenter.helpers.WatchTransDBParser;
 import watch.oms.omswatch.application.OMSApplication;
 import watch.oms.omswatch.constants.ConsoleDBConstants;
@@ -235,11 +237,19 @@ public class BLExecutorActionCenter implements OMSReceiveListener {
 				}
 				serverTableName = new OMSServerMapperHelper().getServerTableName(clientTableName);
 				if (JSONPayLoad != null && JSONPayLoad.length() > 0) {
-					PostAsyncTaskHelper postAsyncTaskHelper = new PostAsyncTaskHelper(
+					/*PostAsyncTaskHelper postAsyncTaskHelper = new PostAsyncTaskHelper(
 							context, clientTableName, JSONPayLoad, blactionList.get(index).blusid,
 							BLExecutorActionCenter.this, configDBAppId,loadMessage);
 
-					postAsyncTaskHelper.execute(transUrl,serverTableName, /* clientTableName,*/schemaName,successMessageColumn,successMessage);
+					postAsyncTaskHelper.execute(transUrl,serverTableName, *//* clientTableName,*//*schemaName,successMessageColumn,successMessage);*/
+
+					WatchPostAsyncTaskHelper watchPostAsyncTaskHelper = new WatchPostAsyncTaskHelper(context, clientTableName, JSONPayLoad, blactionList.get(index).blusid,
+							BLExecutorActionCenter.this, configDBAppId,loadMessage,serverTableName,schemaName,successMessageColumn,successMessage);
+                    JSONObject postJSON = new JSONObject();
+                    postJSON.put("posturl",transUrl);
+                    postJSON.put("jsonpayload",JSONPayLoad);
+                    OMSApplication.getInstance().setTransPostDataAPIURL(postJSON.toString());
+                    watchPostAsyncTaskHelper.callMessageService(transUrl);
 				} else {
 					//rListener.receiveResult(OMSMessages.REFRESH.getValue());
 					receiveResult(OMSMessages.BL_SUCCESS.getValue());
@@ -760,12 +770,25 @@ public class BLExecutorActionCenter implements OMSReceiveListener {
 						clientTableName);*/
 				if (JSONPayLoad != null && JSONPayLoad.length() > 0) {
 				String	serverTableName =  new OMSServerMapperHelper().getServerTableName(clientTableName);
-					PostAsyncTaskHelper postAsyncTaskHelper = new PostAsyncTaskHelper(
+					/*PostAsyncTaskHelper postAsyncTaskHelper = new PostAsyncTaskHelper(
 							context, clientTableName, JSONPayLoad, blactionList.get(index).blusid,
-							BLExecutorActionCenter.this, configDBAppId,loadMessage);
+							BLExecutorActionCenter.this, configDBAppId,loadMessage);*/
 					if (blList != null && blList.size() > 0)
-						postAsyncTaskHelper.execute(transUrl,
-								serverTableName/*blList.get("datatablename")*/,schemaName,successMessageColumn,successMessage);
+						/*postAsyncTaskHelper.execute(transUrl,
+								serverTableName*//*blList.get("datatablename")*//*,schemaName,successMessageColumn,successMessage);*/
+                   try {
+                       WatchPostAsyncTaskHelper watchPostAsyncTaskHelper = new WatchPostAsyncTaskHelper(context, clientTableName, JSONPayLoad, blactionList.get(index).blusid,
+                               BLExecutorActionCenter.this, configDBAppId, loadMessage, serverTableName, schemaName, successMessageColumn, successMessage);
+                       JSONObject postJSON = new JSONObject();
+                       postJSON.put("posturl", transUrl);
+                       postJSON.put("jsonpayload", JSONPayLoad);
+                       OMSApplication.getInstance().setTransPostDataAPIURL(postJSON.toString());
+                       watchPostAsyncTaskHelper.callMessageService(transUrl);
+                   }catch (JSONException e){
+                       e.printStackTrace();
+                    }catch (Exception e){
+                       e.printStackTrace();
+                   }
 				} else {
 					//rListener.receiveResult(OMSMessages.REFRESH.getValue());
 					receiveResult(OMSMessages.BL_SUCCESS.getValue());

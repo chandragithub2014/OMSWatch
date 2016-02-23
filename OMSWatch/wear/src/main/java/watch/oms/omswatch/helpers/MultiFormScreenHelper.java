@@ -397,10 +397,38 @@ public class MultiFormScreenHelper {
                                     tempmultiFormHashTable
                                             .put("columnid", "");
                                 }
+
+                           if (multiFormScreenItemsCursor
+                                    .getString(multiFormScreenItemsCursor.getColumnIndex("blname")) != null) {
+                                tempmultiFormHashTable
+                                        .put("blname",
+                                                multiFormScreenItemsCursor
+                                                        .getString(multiFormScreenItemsCursor
+                                                                .getColumnIndex("blname")));
+                            } else {
+                                tempmultiFormHashTable
+                                        .put("blname", "");
+                            }
+
+                            if (multiFormScreenItemsCursor
+                                    .getString(multiFormScreenItemsCursor.getColumnIndex("type")) != null) {
+                                tempmultiFormHashTable
+                                        .put("type",
+                                                multiFormScreenItemsCursor
+                                                        .getString(multiFormScreenItemsCursor
+                                                                .getColumnIndex("type")));
+                            } else {
+                                tempmultiFormHashTable
+                                        .put("type", "");
+                            }
+
+
                                 tempmultiFormHashTable
                                         .put("columntype",
                                                 multiFormScreenItemsCursor
                                                         .getString(multiFormScreenItemsCursor.getColumnIndex("columntype")));
+
+
                              /*   if (!multiFormScreenItemsCursor.getString(
                                         multiFormScreenItemsCursor
                                                 .getColumnIndex(OMSMessages.COLUMN
